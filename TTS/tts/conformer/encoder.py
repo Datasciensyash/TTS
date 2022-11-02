@@ -16,6 +16,8 @@ class ConformerEncoder(nn.Module):
             self._output_projection = nn.Linear(in_channels, out_channels)
 
     def forward(self, x, x_mask):
+        print('X: ', x.shape)
+        print('X_MASK: ', x_mask.shape)
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
