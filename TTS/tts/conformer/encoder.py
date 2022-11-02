@@ -24,6 +24,7 @@ class ConformerEncoder(nn.Module):
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
+        print('X_MASK: ', x.shape)
         x = self._conformer_encoder(x, x_mask)
         x = x.transpose(1, 2)
 
