@@ -18,10 +18,15 @@ class ConformerEncoder(nn.Module):
     def forward(self, x, x_mask):
         print('X: ', x.shape)
         print('X_MASK: ', x_mask.shape)
+
+        x = x.transpose(1, 2)
+
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
         x = self._conformer_encoder(x, x_mask)
+        x = x.transpose(1, 2)
+
         if self._output_projection is not None:
             x = self._output_projection(x)
         return x
