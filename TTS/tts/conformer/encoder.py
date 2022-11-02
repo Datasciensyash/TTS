@@ -25,7 +25,7 @@ class ConformerEncoder(nn.Module):
             x_mask = x_mask.unsqueeze(1)
 
         print('X_MASK: ', x.shape)
-        x = self._conformer_encoder(x, x_mask)
+        x = self._conformer_encoder(x, x_mask)[0]
         x = x.transpose(1, 2)
 
         if self._output_projection is not None:
