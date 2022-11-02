@@ -150,7 +150,7 @@ class Encoder(nn.Module):
             # pylint: disable=unexpected-keyword-arg
             self.encoder = FFTransformerBlock(in_hidden_channels, **encoder_params)
         elif encoder_type.lower() == "conformer":
-            self.decoder = ConformerEncoder(
+            self.encoder = ConformerEncoder(
                 in_hidden_channels, out_channels, encoder_params
             )
         else:
