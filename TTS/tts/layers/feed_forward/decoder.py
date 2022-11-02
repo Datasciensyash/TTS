@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from TTS.tts.conformer.encoder import ConformerDecoder
 from TTS.tts.layers.generic.res_conv_bn import Conv1dBN, Conv1dBNBlock, ResidualConv1dBNBlock
 from TTS.tts.layers.generic.transformer import FFTransformerBlock
 from TTS.tts.layers.generic.wavenet import WNBlocks
@@ -215,6 +216,12 @@ class Decoder(nn.Module):
             )
         elif decoder_type.lower() == "fftransformer":
             self.decoder = FFTransformerDecoder(in_hidden_channels, out_channels, decoder_params)
+
+        elif decoder_type.lower() == "conformer":
+            self.decoder = ConformerDecoder(
+                in_hidden_channels, out_channels, decoder_params
+            )
+
         else:
             raise ValueError(f"[!] Unknown decoder type - {decoder_type}")
 

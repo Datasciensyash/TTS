@@ -1,5 +1,6 @@
 from torch import nn
 
+from TTS.tts.conformer.encoder import ConformerEncoder
 from TTS.tts.layers.generic.res_conv_bn import ResidualConv1dBNBlock
 from TTS.tts.layers.generic.transformer import FFTransformerBlock
 from TTS.tts.layers.glow_tts.transformer import RelativePositionTransformer
@@ -148,6 +149,10 @@ class Encoder(nn.Module):
             ), "[!] must be `in_channels` == `out_channels` when encoder type is 'fftransformer'"
             # pylint: disable=unexpected-keyword-arg
             self.encoder = FFTransformerBlock(in_hidden_channels, **encoder_params)
+        elif encoder_type.lower() == "conformer":
+            self.decoder = ConformerEncoder(
+                in_hidden_channels, out_channels, encoder_params
+            )
         else:
             raise NotImplementedError(" [!] unknown encoder type.")
 
