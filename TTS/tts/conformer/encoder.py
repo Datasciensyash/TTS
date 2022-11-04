@@ -88,7 +88,7 @@ class ConformerEncoder(nn.Module):
         if out_channels != in_channels:
             self._output_projection = nn.Linear(in_channels, out_channels)
 
-    def forward(self, x, x_mask):
+    def forward(self, x, x_mask, g=None):
         print('X: ', x.shape)
         print('X_MASK: ', x_mask.shape)
 
@@ -136,7 +136,7 @@ class ConformerDecoder(nn.Module):
         if out_channels != in_channels:
             self._output_projection = nn.Linear(in_channels, out_channels)
 
-    def forward(self, x, x_mask):
+    def forward(self, x, x_mask, g=None):
         print('X: ', x.shape)
         print('X_MASK: ', x_mask.shape)
 
