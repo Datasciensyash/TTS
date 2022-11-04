@@ -151,10 +151,11 @@ class ConformerDecoder(nn.Module):
         print('X: ', x.shape)
         x = self._conformer_encoder(x, x_mask)[0]
         print('X_AFTER_CONFORMER: ', x.shape)
-        x = x.transpose(1, 2)
 
         print('X_BEFORE_PROJ: ', x.shape)
         if self._output_projection is not None:
             x = self._output_projection(x)
+
+        x = x.transpose(1, 2)
         print('X_AFTER_PROJ: ', x.shape)
         return x
