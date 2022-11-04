@@ -97,12 +97,15 @@ class ConformerEncoder(nn.Module):
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
-        print('X_MASK: ', x.shape)
+        print('X: ', x.shape)
         x = self._conformer_encoder(x, x_mask)[0]
+        print('X_AFTER_CONFORMER: ', x.shape)
         x = x.transpose(1, 2)
 
+        print('X_BEFORE_PROJ: ', x.shape)
         if self._output_projection is not None:
             x = self._output_projection(x)
+        print('X_AFTER_PROJ: ', x.shape)
         return x
 
 
@@ -145,10 +148,13 @@ class ConformerDecoder(nn.Module):
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
-        print('X_MASK: ', x.shape)
+        print('X: ', x.shape)
         x = self._conformer_encoder(x, x_mask)[0]
+        print('X_AFTER_CONFORMER: ', x.shape)
         x = x.transpose(1, 2)
 
+        print('X_BEFORE_PROJ: ', x.shape)
         if self._output_projection is not None:
             x = self._output_projection(x)
+        print('X_AFTER_PROJ: ', x.shape)
         return x
