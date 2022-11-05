@@ -124,23 +124,23 @@ class Encoder(torch.nn.Module):
     def __init__(
         self,
         idim,
-        attention_dim=386, #
-        attention_heads=2, #
-        linear_units=1536, #
-        num_blocks=4, #
-        dropout_rate=0.2,  #
-        positional_dropout_rate=0.2, #
-        attention_dropout_rate=0.2,#
-        input_layer="conv2d",
+        attention_dim=386,
+        attention_heads=2,
+        linear_units=1536,
+        num_blocks=4,
+        dropout_rate=0.2,
+        positional_dropout_rate=0.2,
+        attention_dropout_rate=0.2,
+        input_layer=None,
         normalize_before=True,
         concat_after=False,
         positionwise_layer_type="conv1d",
         positionwise_conv_kernel_size=3,
-        macaron_style=False,
-        pos_enc_layer_type="abs_pos",
-        selfattention_layer_type="selfattn",
+        macaron_style=True,
+        pos_enc_layer_type="rel_pos",
+        selfattention_layer_type="rel_selfattn",
         activation_type="swish",
-        use_cnn_module=False,
+        use_cnn_module=True,
         zero_triu=False,
         cnn_module_kernel=31,
         padding_idx=-1,

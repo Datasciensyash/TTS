@@ -58,30 +58,19 @@ from TTS.tts.conformer.conformer import Encoder
 
 class ConformerEncoder(nn.Module):
 
-    def __init__(self, in_channels: int, out_channels: int, params: dict, cnn_module_kernel=31) -> None:
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            params: dict,
+    ) -> None:
         super(ConformerEncoder, self).__init__()
 
         self._conformer_encoder = Encoder(
-            idim=in_channels,
-            attention_dim=384,
-            attention_heads=2,
-            linear_units=1536,
-            num_blocks=4,
+            idim=0,  # Unused, because input_layer=None
             input_layer=None,
-            dropout_rate=0.2,
-            positional_dropout_rate=0.2,
-            attention_dropout_rate=0.2,
-            normalize_before=True,
-            concat_after=False,
-            positionwise_layer_type="conv1d",
-            positionwise_conv_kernel_size=3,
-            macaron_style=True,
-            pos_enc_layer_type="rel_pos",
-            selfattention_layer_type="rel_selfattn",
-            activation_type="swish",
-            use_cnn_module=True,
             cnn_module_kernel=7,
-            zero_triu=False,
+            **params
         )
 
         self._output_projection = None
@@ -89,50 +78,31 @@ class ConformerEncoder(nn.Module):
             self._output_projection = nn.Linear(in_channels, out_channels)
 
     def forward(self, x, x_mask, g=None):
-        print('X: ', x.shape)
-        print('X_MASK: ', x_mask.shape)
-
         x = x.transpose(1, 2)
 
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
-        print('X: ', x.shape)
         x = self._conformer_encoder(x, x_mask)[0]
-        print('X_AFTER_CONFORMER: ', x.shape)
+
         x = x.transpose(1, 2)
 
-        print('X_BEFORE_PROJ: ', x.shape)
         if self._output_projection is not None:
             x = self._output_projection(x)
-        print('X_AFTER_PROJ: ', x.shape)
+
         return x
 
 
 class ConformerDecoder(nn.Module):
     """Yeah... just an alias. Live with this information."""
-    def __init__(self, in_channels: int, out_channels: int, params: dict, cnn_module_kernel=7) -> None:
+    def __init__(self, in_channels: int, out_channels: int, params: dict) -> None:
         super(ConformerDecoder, self).__init__()
 
         self._conformer_encoder = Encoder(
-            idim=in_channels,
-            attention_dim=384,
-            attention_heads=2,
-            linear_units=1536,
-            num_blocks=4,
+            idim=0,  # Unused, because input_layer=None
             input_layer=None,
-            dropout_rate=0.2,
-            positional_dropout_rate=0.2,
-            attention_dropout_rate=0.2,
-            normalize_before=True,
-            positionwise_layer_type="conv1d",
-            positionwise_conv_kernel_size=3,
-            macaron_style=True,
-            pos_enc_layer_type="rel_pos",
-            selfattention_layer_type="rel_selfattn",
-            activation_type="swish",
-            use_cnn_module=True,
             cnn_module_kernel=31,
+            **params
         )
 
         self._output_projection = None
@@ -140,22 +110,16 @@ class ConformerDecoder(nn.Module):
             self._output_projection = nn.Linear(in_channels, out_channels)
 
     def forward(self, x, x_mask, g=None):
-        print('X: ', x.shape)
-        print('X_MASK: ', x_mask.shape)
-
         x = x.transpose(1, 2)
 
         if x_mask.ndim == 2:
             x_mask = x_mask.unsqueeze(1)
 
-        print('X: ', x.shape)
         x = self._conformer_encoder(x, x_mask)[0]
-        print('X_AFTER_CONFORMER: ', x.shape)
 
-        print('X_BEFORE_PROJ: ', x.shape)
+        x = x.transpose(1, 2)
+
         if self._output_projection is not None:
             x = self._output_projection(x)
 
-        x = x.transpose(1, 2)
-        print('X_AFTER_PROJ: ', x.shape)
         return x
