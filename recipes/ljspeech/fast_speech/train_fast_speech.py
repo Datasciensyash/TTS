@@ -1,3 +1,5 @@
+
+
 import os
 
 from trainer import Trainer, TrainerArgs
@@ -36,8 +38,8 @@ audio_config = BaseAudioConfig(
 config = FastSpeechConfig(
     run_name="fast_speech_ljspeech",
     audio=audio_config,
-    batch_size=32,
-    eval_batch_size=16,
+    batch_size=12,
+    eval_batch_size=8,
     num_loader_workers=8,
     num_eval_loader_workers=4,
     compute_input_seq_cache=True,
@@ -53,9 +55,10 @@ config = FastSpeechConfig(
     print_step=50,
     print_eval=False,
     mixed_precision=False,
-    max_seq_len=500000,
+    max_seq_len=150,
     output_path=output_path,
     datasets=[dataset_config],
+    scheduler_after_epoch=False
 )
 
 # compute alignments

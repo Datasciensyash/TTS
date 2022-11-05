@@ -1,9 +1,11 @@
+
+
 import os
 
 from trainer import Trainer, TrainerArgs
 
-from TTS.config.shared_configs import BaseAudioConfig, BaseDatasetConfig
-from TTS.tts.configs.fast_pitch_config import FastPitchConfig
+from TTS.config import BaseAudioConfig, BaseDatasetConfig
+from TTS.tts.configs.fast_speech_config import FastSpeechConfig
 from TTS.tts.datasets import load_tts_samples
 from TTS.tts.models.forward_tts import ForwardTTS, ForwardTTSArgs
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
@@ -33,8 +35,8 @@ audio_config = BaseAudioConfig(
     preemphasis=0.0,
 )
 
-config = FastPitchConfig(
-    run_name="fast_pitch_ljspeech",
+config = FastSpeechConfig(
+    run_name="conformer_fast_speech_ljspeech",
     audio=audio_config,
     model_args=ForwardTTSArgs(
         use_pitch=False,
@@ -48,8 +50,7 @@ config = FastPitchConfig(
     num_loader_workers=8,
     num_eval_loader_workers=4,
     compute_input_seq_cache=True,
-    compute_f0=True,
-    f0_cache_path=os.path.join(output_path, "f0_cache"),
+    compute_f0=False,
     run_eval=True,
     test_delay_epochs=-1,
     epochs=1000,
@@ -57,11 +58,11 @@ config = FastPitchConfig(
     use_phonemes=True,
     phoneme_language="en-us",
     phoneme_cache_path=os.path.join(output_path, "phoneme_cache"),
-    precompute_num_workers=4,
+    precompute_num_workers=8,
     print_step=50,
     print_eval=False,
     mixed_precision=False,
-    max_seq_len=500000,
+    max_seq_len=150,
     output_path=output_path,
     datasets=[dataset_config],
     scheduler_after_epoch=False
@@ -99,7 +100,7 @@ train_samples, eval_samples = load_tts_samples(
 )
 
 # init the model
-model = ForwardTTS(config, ap, tokenizer, speaker_manager=None)
+model = ForwardTTS(config, ap, tokenizer)
 
 # init the trainer and 🚀
 trainer = Trainer(
