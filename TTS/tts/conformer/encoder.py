@@ -108,6 +108,9 @@ class ConformerDecoder(nn.Module):
             **params
         )
 
+        for i in range(10):
+            print(in_channels, out_channels)
+
         self._output_projection = None
         if out_channels != in_channels:
             self._output_projection = nn.Linear(in_channels, out_channels)
