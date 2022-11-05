@@ -124,13 +124,13 @@ class ForwardTTSArgs(Coqpit):
     positional_encoding: bool = True
     poisitonal_encoding_use_scale: bool = True
     length_scale: int = 1
-    encoder_type: str = "conformer"
+    encoder_type: str = "fftransformer"
     encoder_params: dict = field(
-        default_factory=lambda: {}
+        default_factory=lambda: {"hidden_channels_ffn": 1024, "num_heads": 1, "num_layers": 6, "dropout_p": 0.1}
     )
-    decoder_type: str = "conformer"
+    decoder_type: str = "fftransformer"
     decoder_params: dict = field(
-        default_factory=lambda: {}
+        default_factory=lambda: {"hidden_channels_ffn": 1024, "num_heads": 1, "num_layers": 6, "dropout_p": 0.1}
     )
     detach_duration_predictor: bool = False
     max_duration: int = 75

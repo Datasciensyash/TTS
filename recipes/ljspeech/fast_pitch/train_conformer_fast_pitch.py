@@ -5,7 +5,7 @@ from trainer import Trainer, TrainerArgs
 from TTS.config.shared_configs import BaseAudioConfig, BaseDatasetConfig
 from TTS.tts.configs.fast_pitch_config import FastPitchConfig
 from TTS.tts.datasets import load_tts_samples
-from TTS.tts.models.forward_tts import ForwardTTS, ForwardTTSArgs
+from TTS.tts.models.forward_tts import ForwardTTS
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.manage import ModelManager
@@ -34,15 +34,8 @@ audio_config = BaseAudioConfig(
 )
 
 config = FastPitchConfig(
-    run_name="fast_pitch_ljspeech",
+    run_name="conformer_fast_pitch_ljspeech",
     audio=audio_config,
-    model_args = ForwardTTSArgs(
-        use_pitch=False,
-        encoder_type="conformer",
-        encoder_params={},
-        decoder_type="conformer",
-        decoder_params={}
-    ),
     batch_size=32,
     eval_batch_size=16,
     num_loader_workers=8,
