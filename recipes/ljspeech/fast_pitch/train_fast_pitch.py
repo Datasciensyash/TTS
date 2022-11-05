@@ -43,7 +43,7 @@ config = FastPitchConfig(
         decoder_type="conformer",
         decoder_params={}
     ),
-    batch_size=16,
+    batch_size=12,
     eval_batch_size=8,
     num_loader_workers=8,
     num_eval_loader_workers=4,
