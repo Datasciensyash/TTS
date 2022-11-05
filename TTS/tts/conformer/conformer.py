@@ -124,7 +124,7 @@ class Encoder(torch.nn.Module):
     def __init__(
         self,
         idim,
-        attention_dim=386,
+        attention_dim=384,
         attention_heads=2,
         linear_units=1536,
         num_blocks=4,
