@@ -66,6 +66,9 @@ class ConformerEncoder(nn.Module):
     ) -> None:
         super(ConformerEncoder, self).__init__()
 
+        for i in range(10):
+            print(in_channels, out_channels)
+
         self._conformer_encoder = Encoder(
             idim=0,  # Unused, because input_layer=None
             input_layer=None,
