@@ -66,9 +66,6 @@ class ConformerEncoder(nn.Module):
     ) -> None:
         super(ConformerEncoder, self).__init__()
 
-        for i in range(10):
-            print(in_channels, out_channels)
-
         self._conformer_encoder = Encoder(
             idim=0,  # Unused, because input_layer=None
             input_layer=None,
@@ -88,10 +85,10 @@ class ConformerEncoder(nn.Module):
 
         x = self._conformer_encoder(x, x_mask)[0]
 
-        x = x.transpose(1, 2)
-
         if self._output_projection is not None:
             x = self._output_projection(x)
+
+        x = x.transpose(1, 2)
 
         return x
 
@@ -108,9 +105,6 @@ class ConformerDecoder(nn.Module):
             **params
         )
 
-        for i in range(10):
-            print(in_channels, out_channels)
-
         self._output_projection = None
         if out_channels != in_channels:
             self._output_projection = nn.Linear(in_channels, out_channels)
@@ -123,9 +117,9 @@ class ConformerDecoder(nn.Module):
 
         x = self._conformer_encoder(x, x_mask)[0]
 
-        x = x.transpose(1, 2)
-
         if self._output_projection is not None:
             x = self._output_projection(x)
+
+        x = x.transpose(1, 2)
 
         return x
