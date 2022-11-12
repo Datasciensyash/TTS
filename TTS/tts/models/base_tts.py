@@ -12,6 +12,7 @@ from trainer.torch import DistributedSampler, DistributedSamplerWrapper
 
 from TTS.model import BaseTrainerModel
 from TTS.tts.datasets.dataset import TTSDataset
+from TTS.tts.datasets.sampler import LengthSortSampler
 from TTS.tts.utils.data import get_length_balancer_weights
 from TTS.tts.utils.languages import LanguageManager, get_language_balancer_weights
 from TTS.tts.utils.speakers import SpeakerManager, get_speaker_balancer_weights, get_speaker_manager
@@ -338,19 +339,38 @@ class BaseTTS(BaseTrainerModel):
             # sort input sequences from short to long
             dataset.preprocess_samples()
 
-            # get samplers
-            sampler = self.get_sampler(config, dataset, num_gpus)
+            import os
+            if os.environ.get("USE_LENGTH_SORT_SAMPLER", False):
+                print('Using LengthSortSampler!')
+                batch_sampler = LengthSortSampler(
+                    dataset,
+                    batch_size=config.eval_batch_size if is_eval else config.batch_size
+                )
 
-            loader = DataLoader(
-                dataset,
-                batch_size=config.eval_batch_size if is_eval else config.batch_size,
-                shuffle=True,  # if there is no other sampler
-                collate_fn=dataset.collate_fn,
-                drop_last=False,  # setting this False might cause issues in AMP training.
-                sampler=sampler,
-                num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
-                pin_memory=False,
-            )
+                loader = DataLoader(
+                    dataset,
+                    collate_fn=dataset.collate_fn,
+                    sampler=None,
+                    num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
+                    pin_memory=False,
+                    # Note: Only for conformer training
+                    batch_sampler=batch_sampler,
+                )
+            else:
+                print('Not using LengthSortSampler!')
+                sampler = self.get_sampler(config, dataset, num_gpus)
+
+                loader = DataLoader(
+                    dataset,
+                    batch_size=config.eval_batch_size if is_eval else config.batch_size,
+                    shuffle=True,  # if there is no other sampler
+                    collate_fn=dataset.collate_fn,
+                    drop_last=False,  # setting this False might cause issues in AMP training.
+                    sampler=sampler,
+                    num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
+                    pin_memory=False,
+                )
+
         return loader
 
     def _get_test_aux_input(
