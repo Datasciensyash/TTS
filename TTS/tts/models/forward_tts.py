@@ -238,6 +238,9 @@ class ForwardTTS(BaseTTS):
                 in_query_channels=self.args.out_channels, in_key_channels=self.args.hidden_channels
             )
 
+        # TODO: Boop boop boop
+        self._g_adaptor = nn.Linear(512, 384)
+
     def init_multispeaker(self, config: Coqpit):
         """Init for multi-speaker training.
 
@@ -364,7 +367,7 @@ class ForwardTTS(BaseTTS):
         # speaker conditioning
         # TODO: try different ways of conditioning
         if g is not None:
-            o_en = o_en + g
+            o_en = o_en + self._g_adaptor(g)
         return o_en, x_mask, g, x_emb
 
     def _forward_decoder(
