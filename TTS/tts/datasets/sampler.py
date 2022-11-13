@@ -17,7 +17,7 @@ class LengthSortSampler(Sampler):
 
     def __iter__(self):
         # TODO
-        sorted_lengths = np.argsort(self._lengths)[:-100]
+        sorted_lengths = np.argsort(self._lengths)
         for i in range(len(sorted_lengths) // self.batch_size):
             start_index = random.randint(0, len(sorted_lengths) - self.batch_size)
             if i == 0:
