@@ -16,13 +16,20 @@ class LengthSortSampler(Sampler):
         self.batch_size = batch_size
 
     def __iter__(self):
-        # TODO
+        # TODO: This module also implements dynamic batch size
+
         sorted_lengths = np.argsort(self._lengths)
         for i in range(len(sorted_lengths) // self.batch_size):
             start_index = random.randint(0, len(sorted_lengths) - self.batch_size)
+
             if i == 0:
-                start_index = len(sorted_lengths) - self.batch_size
-            yield sorted_lengths[start_index: start_index + self.batch_size]
+                start_index = len(sorted_lengths) - self.batch_size // 2
+
+            batch_size = self.batch_size
+            if start_index > len(sorted_lengths) // 2:
+                batch_size = batch_size // 2
+
+            yield sorted_lengths[start_index: start_index + batch_size]
 
     def __len__(self):
         return len(self._data_source) // self.batch_size
