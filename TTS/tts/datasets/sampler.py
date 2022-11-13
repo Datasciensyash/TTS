@@ -23,11 +23,17 @@ class LengthSortSampler(Sampler):
             start_index = random.randint(0, len(sorted_lengths) - self.batch_size)
 
             if i == 0:
-                start_index = len(sorted_lengths) - self.batch_size // 2
+                start_index = len(sorted_lengths)
 
             batch_size = self.batch_size
             if start_index > len(sorted_lengths) // 2:
                 batch_size = batch_size // 2
+
+            if start_index > int(len(sorted_lengths) * 0.8):
+                batch_size = batch_size // 2
+
+            if i == 0:
+                start_index = len(sorted_lengths) - batch_size
 
             yield sorted_lengths[start_index: start_index + batch_size]
 
