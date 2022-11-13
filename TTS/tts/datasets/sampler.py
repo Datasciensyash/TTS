@@ -26,8 +26,8 @@ class LengthSortSampler(Sampler):
                 start_index = len(sorted_lengths)
 
             batch_size = self.batch_size
-            if start_index > int(len(sorted_lengths) * 0.8):
-                batch_size = batch_size // 6
+            if start_index > len(sorted_lengths) // 2:
+                batch_size = batch_size // 2
 
             if i == 0:
                 start_index = len(sorted_lengths) - batch_size
