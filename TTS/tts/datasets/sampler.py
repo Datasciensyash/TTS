@@ -17,8 +17,10 @@ class LengthSortSampler(Sampler):
 
     def __iter__(self):
         sorted_lengths = np.argsort(self._lengths)
-        for _ in range(len(self._data_source) // self.batch_size):
+        for i in range(len(self._data_source) // self.batch_size):
             start_index = random.randint(0, len(self._data_source) - self.batch_size)
+            if i == 0:
+                start_index = len(self._data_source) - self.batch_size
             yield sorted_lengths[start_index: start_index + self.batch_size]
 
     def __len__(self):
