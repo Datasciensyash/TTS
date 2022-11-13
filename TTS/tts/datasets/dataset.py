@@ -162,10 +162,10 @@ class TTSDataset(Dataset):
     @property
     def lengths(self):
         lens = []
-        print(self.samples)
         for item in self.samples:
-            _, wav_file, *_ = _parse_sample(item)
-            audio_len = os.path.getsize(wav_file) / 16 * 8  # assuming 16bit audio
+            #_, wav_file, *_ = _parse_sample(item)
+            #audio_len = os.path.getsize(wav_file) / 16 * 8  # assuming 16bit audio
+            audio_len = item["audio_length"]
             lens.append(audio_len)
         return lens
 
