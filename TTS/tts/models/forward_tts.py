@@ -356,10 +356,12 @@ class ForwardTTS(BaseTTS):
             - x_mask: :math:`(B, 1, T_{en})`
             - g: :math:`(B, C)`
         """
+        print(g.shape)
         if hasattr(self, "emb_g"):
             g = self.emb_g(g)  # [B, C, 1]
         if g is not None:
             g = g.unsqueeze(-1)
+        print(g.shape)
         # [B, T, C]
         x_emb = self.emb(x)
         # encoder pass
@@ -367,6 +369,7 @@ class ForwardTTS(BaseTTS):
         # speaker conditioning
         # TODO: try different ways of conditioning
         if g is not None:
+            print(g.shape)
             o_en = o_en + self._g_adaptor(g)
         return o_en, x_mask, g, x_emb
 
