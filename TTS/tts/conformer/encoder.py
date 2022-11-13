@@ -78,6 +78,7 @@ class ConformerEncoder(nn.Module):
             self._output_projection = nn.Linear(in_channels, out_channels)
 
     def forward(self, x, x_mask, g=None):
+        print(x.shape)
         x = x.transpose(1, 2)
 
         if x_mask.ndim == 2:
