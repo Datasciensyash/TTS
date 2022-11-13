@@ -35,6 +35,8 @@ class LengthSortSampler(Sampler):
             if i == 0:
                 start_index = len(sorted_lengths) - batch_size
 
+            print(batch_size)
+
             yield sorted_lengths[start_index: start_index + batch_size]
 
     def __len__(self):
