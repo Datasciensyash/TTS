@@ -157,7 +157,7 @@ class Encoder(torch.nn.Module):
         assert selfattention_layer_type == "legacy_rel_selfattn"
 
         pos_enc_layer_type = "abs_pos"
-        selfattention_layer_type = "self-attn"
+        selfattention_layer_type = "selfattn"
 
         activation = get_activation(activation_type)
         if pos_enc_layer_type == "abs_pos":
