@@ -54,6 +54,7 @@ class EncoderLayer(nn.Module):
         """Construct an EncoderLayer object."""
         super(EncoderLayer, self).__init__()
         self.self_attn = self_attn
+        print(self.self_attn)
         self.feed_forward = feed_forward
         self.feed_forward_macaron = feed_forward_macaron
         self.conv_module = conv_module
