@@ -2,8 +2,6 @@ import os
 
 from trainer import Trainer, TrainerArgs
 
-from TTS.callbacks.weights import WeightNormCallback
-
 from TTS.config import BaseAudioConfig, BaseDatasetConfig
 from TTS.tts.configs.fast_speech_config import FastSpeechConfig
 from TTS.tts.datasets import load_tts_samples
@@ -11,6 +9,9 @@ from TTS.tts.models.forward_tts import ForwardTTS, ForwardTTSArgs
 from TTS.tts.utils.speakers import SpeakerManager
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
+
+from TTS.callbacks.weights import WeightNormCallback
+
 
 output_path = os.path.dirname(os.path.abspath(__file__))
 dataset_config = BaseDatasetConfig(formatter="vctk", meta_file_train="", path=os.path.join(output_path, "../VCTK/"))
@@ -29,7 +30,7 @@ audio_config = BaseAudioConfig(
 )
 
 config = FastSpeechConfig(
-    run_name="conformer_fast_speech_witcher",
+    run_name="fast_speech_WITCHER_CONFORMER",
     model_args=ForwardTTSArgs(
         use_pitch=False,
         encoder_type="conformer",
@@ -38,8 +39,8 @@ config = FastSpeechConfig(
         decoder_params={'attention_dim': 256, 'attention_heads': 4, 'linear_units': 1536},
         d_vector_dim=512,
         hidden_channels=256,
-        use_d_vector_file=True,
-        d_vector_file='/home/frappuccino/dsyash/TTS/recipes/vctk/fast_speech/speaker_speechbrain_witcher.pth'
+        #use_d_vector_file=True,
+        #d_vector_file='/home/frappuccino/dsyash/TTS/recipes/vctk/fast_speech/speaker_speechbrain_witcher.pth'
     ),
     audio=audio_config,
     batch_size=32,
@@ -59,13 +60,12 @@ config = FastSpeechConfig(
     print_eval=False,
     mixed_precision=False,
     min_text_len=0,
-    max_text_len=200,
+    max_text_len=500,
     min_audio_len=0,
-    max_audio_len=192000,
+    max_audio_len=500000,
     output_path=output_path,
     datasets=[dataset_config],
-#    use_speaker_embedding=True,
-    lr=1.e-2,
+    use_speaker_embedding=True,
     scheduler_after_epoch=False
 )
 
@@ -93,18 +93,16 @@ train_samples, eval_samples = load_tts_samples(
 
 # init speaker manager for multi-speaker training
 # it maps speaker-id to speaker-name in the model and data-loader
-speaker_manager = SpeakerManager(d_vectors_file_path='/home/frappuccino/dsyash/TTS/recipes/vctk/fast_speech/speaker_speechbrain_witcher.pth')
-# speaker_manager.set_ids_from_data(train_samples + eval_samples, parse_key="speaker_name")
-# config.model_args.num_speakers = speaker_manager.num_speakers
+speaker_manager = SpeakerManager()
+speaker_manager.set_ids_from_data(train_samples + eval_samples, parse_key="speaker_name")
+config.model_args.num_speakers = speaker_manager.num_speakers
 
 # init model
 model = ForwardTTS(config, ap, tokenizer, speaker_manager=speaker_manager)
 
-model.load_checkpoint(config, '/home/frappuccino/dsyash/TTS/recipes/vctk/fast_speech/conformer_fast_speech_witcher-November-13-2022_09+29PM-c9a7e9c8/checkpoint_910000.pth')
 # INITIALIZE THE TRAINER
 # Trainer provides a generic API to train all the 🐸TTS models with all its perks like mixed-precision training,
 # distributed training, etc.
-
 trainer = Trainer(
     TrainerArgs(), config, output_path, model=model, train_samples=train_samples, eval_samples=eval_samples,
     callbacks={"on_after_backward": WeightNormCallback()}
