@@ -156,6 +156,9 @@ class Encoder(torch.nn.Module):
         assert pos_enc_layer_type == "legacy_rel_pos"
         assert selfattention_layer_type == "legacy_rel_selfattn"
 
+        pos_enc_layer_type = "abs_pos"
+        selfattention_layer_type = "self-attn"
+
         activation = get_activation(activation_type)
         if pos_enc_layer_type == "abs_pos":
             pos_enc_class = PositionalEncoding
