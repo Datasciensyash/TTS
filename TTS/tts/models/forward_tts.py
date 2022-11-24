@@ -363,6 +363,13 @@ class ForwardTTS(BaseTTS):
         # [B, T, C]
         x_emb = self.emb(x)
         # encoder pass
+
+        # TODO: REMOVE THIS
+        # TODO: DEBUG ONLY
+        if hasattr(self, "pos_encoder"):
+            print('DEBUG ONLY!!!!!!!!!!!!!!!        ' * 32)
+            o_en_ex = self.pos_encoder(x_emb, x_mask)
+
         o_en = self.encoder(torch.transpose(x_emb, 1, -1), x_mask)
         # speaker conditioning
         # TODO: try different ways of conditioning
