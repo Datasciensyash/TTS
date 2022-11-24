@@ -156,9 +156,6 @@ class Encoder(torch.nn.Module):
         assert pos_enc_layer_type == "legacy_rel_pos"
         assert selfattention_layer_type == "legacy_rel_selfattn"
 
-        pos_enc_layer_type = "abs_pos"
-        selfattention_layer_type = "selfattn"
-
         activation = get_activation(activation_type)
         if pos_enc_layer_type == "abs_pos":
             pos_enc_class = PositionalEncoding
@@ -271,6 +268,9 @@ class Encoder(torch.nn.Module):
         # convolution module definition
         convolution_layer = ConvolutionModule
         convolution_layer_args = (attention_dim, cnn_module_kernel, activation)
+
+        for _ in range(10):
+            print(encoder_selfattn_layer)
 
         self.encoders = repeat(
             num_blocks,
