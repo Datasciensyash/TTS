@@ -239,7 +239,7 @@ class ForwardTTS(BaseTTS):
             )
 
         # TODO: Boop boop boop
-        self._g_adaptor = nn.Linear(512, 256)
+        # self._g_adaptor = nn.Linear(512, 256)
 
     def init_multispeaker(self, config: Coqpit):
         """Init for multi-speaker training.
