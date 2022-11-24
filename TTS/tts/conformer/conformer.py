@@ -269,9 +269,6 @@ class Encoder(torch.nn.Module):
         convolution_layer = ConvolutionModule
         convolution_layer_args = (attention_dim, cnn_module_kernel, activation)
 
-        for _ in range(10):
-            print(encoder_selfattn_layer)
-
         self.encoders = repeat(
             num_blocks,
             lambda lnum: EncoderLayer(
