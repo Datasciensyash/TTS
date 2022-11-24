@@ -152,6 +152,7 @@ class Encoder(torch.nn.Module):
         """Construct an Encoder object."""
         super(Encoder, self).__init__()
 
+        print(pos_enc_layer_type, pos_enc_layer_type)
         assert pos_enc_layer_type == "legacy_rel_pos"
         assert pos_enc_layer_type == "legacy_rel_selfattn"
 
