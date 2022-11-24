@@ -67,8 +67,8 @@ class ConformerEncoder(nn.Module):
         super(ConformerEncoder, self).__init__()
 
         self._conformer_encoder = Encoder(
-            idim=in_channels,  # Unused, because input_layer=None
-            input_layer="linear",
+            idim=0,  # Unused, because input_layer=None
+            input_layer=None,
             cnn_module_kernel=7,
             **params
         )
