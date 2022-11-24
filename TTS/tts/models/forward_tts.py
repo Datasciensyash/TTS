@@ -374,7 +374,7 @@ class ForwardTTS(BaseTTS):
         # speaker conditioning
         # TODO: try different ways of conditioning
         if g is not None:
-            o_en = o_en + self._g_adaptor(g.transpose(-1, -2)).transpose(-1, -2)
+            o_en = o_en + g # self._g_adaptor(g.transpose(-1, -2)).transpose(-1, -2)
         return o_en, x_mask, g, x_emb
 
     def _forward_decoder(
