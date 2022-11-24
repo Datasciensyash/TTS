@@ -3,8 +3,8 @@ from trainer import Trainer
 
 class WeightNormCallback:
 
-    def __init__(self):
-        self._interval = 50
+    def __init__(self, interval: int = 200):
+        self._interval = interval
 
     def __call__(self, trainer: Trainer, *args, **kwargs):
         if trainer.total_steps_done % self._interval != 0:
