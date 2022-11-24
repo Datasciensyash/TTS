@@ -368,7 +368,7 @@ class ForwardTTS(BaseTTS):
         # TODO: DEBUG ONLY
         if hasattr(self, "pos_encoder"):
             print('DEBUG ONLY!!!!!!!!!!!!!!!        ' * 32)
-            o_en_ex = self.pos_encoder(x_emb, x_mask)
+            o_en_ex = self.pos_encoder(torch.transpose(x_emb, 1, -1), x_mask)
 
         o_en = self.encoder(torch.transpose(x_emb, 1, -1), x_mask)
         # speaker conditioning
