@@ -152,6 +152,9 @@ class Encoder(torch.nn.Module):
         """Construct an Encoder object."""
         super(Encoder, self).__init__()
 
+        assert pos_enc_layer_type == "legacy_rel_pos"
+        assert pos_enc_layer_type == "legacy_rel_selfattn"
+
         activation = get_activation(activation_type)
         if pos_enc_layer_type == "abs_pos":
             pos_enc_class = PositionalEncoding
