@@ -170,6 +170,12 @@ class VitsConfig(BaseTTSConfig):
     d_vector_file: str = None
     d_vector_dim: int = None
 
+    # use aux-vectors
+    use_aux_vector_file: bool = False
+    aux_vector_file: str = None
+    aux_vector_dim: int = None
+    aux_vector_encode_first: bool = True
+
     def __post_init__(self):
         for key, val in self.model_args.items():
             if hasattr(self, key):

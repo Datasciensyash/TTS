@@ -65,6 +65,7 @@ class TTSDataset(Dataset):
         use_noise_augment: bool = False,
         start_by_longest: bool = False,
         verbose: bool = False,
+        aux_vector_mapping: Dict = None,
     ):
         """Generic 📂 data loader for `tts` models. It is configurable for different outputs and needs.
 
@@ -137,6 +138,7 @@ class TTSDataset(Dataset):
         self.phoneme_cache_path = phoneme_cache_path
         self.speaker_id_mapping = speaker_id_mapping
         self.d_vector_mapping = d_vector_mapping
+        self.aux_vector_mapping = aux_vector_mapping
         self.language_id_mapping = language_id_mapping
         self.use_noise_augment = use_noise_augment
         self.start_by_longest = start_by_longest
@@ -410,6 +412,12 @@ class TTSDataset(Dataset):
             else:
                 d_vectors = None
 
+            if self.aux_vector_mapping is not None:
+                embedding_keys = list(batch["audio_unique_name"])
+                aux_vectors = [self.aux_vector_mapping[w]["embedding"] for w in embedding_keys]
+            else:
+                aux_vectors = None
+
             # get numerical speaker ids from speaker names
             if self.speaker_id_mapping:
                 speaker_ids = [self.speaker_id_mapping[sn] for sn in batch["speaker_name"]]
@@ -453,6 +461,9 @@ class TTSDataset(Dataset):
             # speaker vectors
             if d_vectors is not None:
                 d_vectors = torch.FloatTensor(d_vectors)
+
+            if aux_vectors is not None:
+                aux_vectors = torch.FloatTensor(aux_vectors)
 
             if speaker_ids is not None:
                 speaker_ids = torch.LongTensor(speaker_ids)
@@ -520,6 +531,7 @@ class TTSDataset(Dataset):
                 "raw_text": batch["raw_text"],
                 "pitch": pitch,
                 "language_ids": language_ids,
+                "aux_vectors": aux_vectors,
             }
 
         raise TypeError(

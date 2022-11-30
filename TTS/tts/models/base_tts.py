@@ -34,6 +34,8 @@ class BaseTTS(BaseTrainerModel):
         tokenizer: "TTSTokenizer",
         speaker_manager: SpeakerManager = None,
         language_manager: LanguageManager = None,
+        # TODO: Don't use SpeakerManager, use EmbeddingManager
+        aux_embedding_manager: SpeakerManager = None,
     ):
         super().__init__()
         self.config = config
@@ -41,6 +43,7 @@ class BaseTTS(BaseTrainerModel):
         self.tokenizer = tokenizer
         self.speaker_manager = speaker_manager
         self.language_manager = language_manager
+        self.aux_embedding_manager = aux_embedding_manager
         self._set_model_args(config)
 
     def _set_model_args(self, config: Coqpit):
@@ -101,6 +104,12 @@ class BaseTTS(BaseTrainerModel):
             self.embedded_speaker_dim = (
                 config.d_vector_dim if "d_vector_dim" in config and config.d_vector_dim is not None else 512
             )
+
+        if config.use_speaker_embedding or config.use_d_vector_file:
+            self.embedded_speaker_dim = (
+                config.d_vector_dim if "aux_vector_dim" in config and config.d_vector_dim is not None else 512
+            )
+
         # init speaker embedding layer
         if config.use_speaker_embedding and not config.use_d_vector_file:
             print(" > Init speaker_embedding layer.")
@@ -109,7 +118,7 @@ class BaseTTS(BaseTrainerModel):
 
     def get_aux_input(self, **kwargs) -> Dict:
         """Prepare and return `aux_input` used by `forward()`"""
-        return {"speaker_id": None, "style_wav": None, "d_vector": None, "language_id": None}
+        return {"speaker_id": None, "style_wav": None, "d_vector": None, "language_id": None, "aux_vector": None}
 
     def get_aux_input_from_test_setences(self, sentence_info):
         if hasattr(self.config, "model_args"):
@@ -133,7 +142,7 @@ class BaseTTS(BaseTrainerModel):
             text = sentence_info
 
         # get speaker  id/d_vector
-        speaker_id, d_vector, language_id = None, None, None
+        speaker_id, d_vector, language_id, aux_vector = None, None, None, None
         if hasattr(self, "speaker_manager"):
             if config.use_d_vector_file:
                 if speaker_name is None:
@@ -146,6 +155,13 @@ class BaseTTS(BaseTrainerModel):
                 else:
                     speaker_id = self.speaker_manager.name_to_id[speaker_name]
 
+        if hasattr(self, "aux_embedding_manager"):
+            if config.use_d_vector_file:
+                if speaker_name is None:
+                    aux_vector = self.aux_embedding_manager.get_random_embedding()
+                else:
+                    aux_vector = self.aux_embedding_manager.get_d_vector_by_name(speaker_name)
+
         # get language id
         if hasattr(self, "language_manager") and config.use_language_embedding and language_name is not None:
             language_id = self.language_manager.name_to_id[language_name]
@@ -156,6 +172,7 @@ class BaseTTS(BaseTrainerModel):
             "style_wav": style_wav,
             "d_vector": d_vector,
             "language_id": language_id,
+            "aux_vector": aux_vector
         }
 
     def format_batch(self, batch: Dict) -> Dict:
@@ -179,6 +196,7 @@ class BaseTTS(BaseTrainerModel):
         stop_targets = batch["stop_targets"]
         item_idx = batch["item_idxs"]
         d_vectors = batch["d_vectors"]
+        aux_vectors = batch["aux_vectors"]
         speaker_ids = batch["speaker_ids"]
         attn_mask = batch["attns"]
         waveform = batch["waveform"]
@@ -232,6 +250,7 @@ class BaseTTS(BaseTrainerModel):
             "waveform": waveform,
             "pitch": pitch,
             "language_ids": language_ids,
+            "aux_vectors": aux_vectors
         }
 
     def get_sampler(self, config: Coqpit, dataset: TTSDataset, num_gpus=1):
@@ -306,6 +325,12 @@ class BaseTTS(BaseTrainerModel):
             else:
                 language_id_mapping = None
 
+            aux_vector_mapping = None
+            if hasattr(self, "aux_embedding_manager") and self.aux_embedding_manager is not None:
+                aux_vector_mapping = self.aux_embedding_manager.embeddings
+                config.use_aux_vector_file = config.model_args.use_aux_vector_file
+
+
             # init dataloader
             dataset = TTSDataset(
                 outputs_per_step=config.r if "r" in config else 1,
@@ -329,6 +354,7 @@ class BaseTTS(BaseTrainerModel):
                 tokenizer=self.tokenizer,
                 start_by_longest=config.start_by_longest,
                 language_id_mapping=language_id_mapping,
+                aux_vector_mapping=aux_vector_mapping
             )
 
             # wait all the DDP process to be ready
@@ -362,12 +388,19 @@ class BaseTTS(BaseTrainerModel):
             d_vector = [self.speaker_manager.embeddings[name]["embedding"] for name in self.speaker_manager.embeddings]
             d_vector = (random.sample(sorted(d_vector), 1),)
 
+        aux_vector = None
+        if self.config.use_d_vector_file:
+            aux_vector = [self.aux_embedding_manager.embeddings[name]["embedding"] for name in self.aux_embedding_manager.embeddings]
+            aux_vector = (random.sample(sorted(aux_vector), 1),)
+
+
         aux_inputs = {
             "speaker_id": None
             if not self.config.use_speaker_embedding
             else random.sample(sorted(self.speaker_manager.name_to_id.values()), 1),
             "d_vector": d_vector,
             "style_wav": None,  # TODO: handle GST style input
+            "aux_vector": aux_vector,
         }
         return aux_inputs
 

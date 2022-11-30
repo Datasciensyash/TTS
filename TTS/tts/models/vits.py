@@ -595,6 +595,9 @@ class VitsArgs(Coqpit):
     interpolate_z: bool = True
     reinit_DP: bool = False
     reinit_text_encoder: bool = False
+    aux_vector_dim: int = 0
+    aux_vector_file: str = None
+    use_aux_vector_file: bool = False
 
 
 class Vits(BaseTTS):
@@ -721,6 +724,10 @@ class Vits(BaseTTS):
                 use_spectral_norm=self.args.use_spectral_norm_disriminator,
             )
 
+        if self.args.aux_vector_dim not in [0, self.args.d_vector_dim]:
+            self._aux_vector_encoding = nn.Linear(self.args.aux_vector_dim, self.args.d_vector_dim)
+
+
     @property
     def device(self):
         return next(self.parameters()).device
@@ -840,8 +847,8 @@ class Vits(BaseTTS):
             print(" > Text Encoder was reinit.")
 
     def get_aux_input(self, aux_input: Dict):
-        sid, g, lid, _ = self._set_cond_input(aux_input)
-        return {"speaker_ids": sid, "style_wav": None, "d_vectors": g, "language_ids": lid}
+        sid, g, lid, _, aux_vectors = self._set_cond_input(aux_input)
+        return {"speaker_ids": sid, "style_wav": None, "d_vectors": g, "language_ids": lid, "aux_vectors": aux_vectors}
 
     def _freeze_layers(self):
         if self.args.freeze_encoder:
@@ -871,7 +878,7 @@ class Vits(BaseTTS):
     @staticmethod
     def _set_cond_input(aux_input: Dict):
         """Set the speaker conditioning input based on the multi-speaker mode."""
-        sid, g, lid, durations = None, None, None, None
+        sid, g, lid, durations, aux_vectors = None, None, None, None, None
         if "speaker_ids" in aux_input and aux_input["speaker_ids"] is not None:
             sid = aux_input["speaker_ids"]
             if sid.ndim == 0:
@@ -889,7 +896,12 @@ class Vits(BaseTTS):
         if "durations" in aux_input and aux_input["durations"] is not None:
             durations = aux_input["durations"]
 
-        return sid, g, lid, durations
+        if "aux_vectors" in aux_input and aux_input["aux_vectors"] is not None:
+            aux_vectors = aux_input[aux_vectors]
+            if aux_vectors.ndim == 2:
+                aux_vectors = aux_vectors.unsqueeze_(0)
+
+        return sid, g, lid, durations, aux_vectors
 
     def _set_speaker_input(self, aux_input: Dict):
         d_vectors = aux_input.get("d_vectors", None)
@@ -963,7 +975,7 @@ class Vits(BaseTTS):
         y: torch.tensor,
         y_lengths: torch.tensor,
         waveform: torch.tensor,
-        aux_input={"d_vectors": None, "speaker_ids": None, "language_ids": None},
+        aux_input={"d_vectors": None, "speaker_ids": None, "language_ids": None, "aux_vectors": None},
     ) -> Dict:
         """Forward pass of the model.
 
@@ -1003,7 +1015,7 @@ class Vits(BaseTTS):
             - syn_spk_emb: :math:`[B, 1, speaker_encoder.proj_dim]`
         """
         outputs = {}
-        sid, g, lid, _ = self._set_cond_input(aux_input)
+        sid, g, lid, _, aux_vectors = self._set_cond_input(aux_input)
         # speaker embedding
         if self.args.use_speaker_embedding and sid is not None:
             g = self.emb_g(sid).unsqueeze(-1)  # [b, h, 1]
@@ -1012,6 +1024,11 @@ class Vits(BaseTTS):
         lang_emb = None
         if self.args.use_language_embedding and lid is not None:
             lang_emb = self.emb_l(lid).unsqueeze(-1)
+
+        # Add auxiliary vector to g-vector
+        if self.args.use_aux_embedding and aux_vectors is not None:
+            aux_emb = self.emb_encoder(aux_vectors).unsqueeze(1) # [b, h, 1]
+            g = g + aux_emb
 
         x, m_p, logs_p, x_mask = self.text_encoder(x, x_lengths, lang_emb=lang_emb)
 
