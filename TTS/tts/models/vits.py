@@ -1503,6 +1503,7 @@ class Vits(BaseTTS):
 
         if self.aux_embedding_manager is not None:
             aux_vector_mapping = self.aux_embedding_manager.embeddings
+            print(aux_vector_mapping.keys())
             aux_vectors = [aux_vector_mapping[w]["embedding"] for w in batch["audio_unique_names"]]
             aux_vectors = torch.FloatTensor(aux_vectors)
         else:
