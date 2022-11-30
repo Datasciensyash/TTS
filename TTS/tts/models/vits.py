@@ -1501,6 +1501,13 @@ class Vits(BaseTTS):
             d_vectors = [d_vector_mapping[w]["embedding"] for w in batch["audio_unique_names"]]
             d_vectors = torch.FloatTensor(d_vectors)
 
+        if self.aux_embedding_manager is not None:
+            aux_vector_mapping = self.aux_embedding_manager.embeddings
+            aux_vectors = [aux_vector_mapping[w]["embedding"] for w in batch["audio_unique_names"]]
+            aux_vectors = torch.FloatTensor(aux_vectors)
+        else:
+            aux_vectors = None
+
         # get language ids from language names
         if self.language_manager is not None and self.language_manager.name_to_id and self.args.use_language_embedding:
             language_ids = [self.language_manager.name_to_id[ln] for ln in batch["language_names"]]
@@ -1511,6 +1518,7 @@ class Vits(BaseTTS):
         batch["language_ids"] = language_ids
         batch["d_vectors"] = d_vectors
         batch["speaker_ids"] = speaker_ids
+        batch["aux_vectors"] = aux_vectors
         return batch
 
     def format_batch_on_device(self, batch):
