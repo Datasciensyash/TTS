@@ -900,8 +900,6 @@ class Vits(BaseTTS):
 
         if "aux_vectors" in aux_input and aux_input["aux_vectors"] is not None:
             aux_vectors = aux_input["aux_vectors"]
-            if aux_vectors.ndim == 2:
-                aux_vectors = aux_vectors.unsqueeze_(0)
 
         return sid, g, lid, durations, aux_vectors
 
@@ -1032,7 +1030,7 @@ class Vits(BaseTTS):
         if self.args.aux_vector_dim != 0 and aux_vectors is not None:
             # print('IT WORKED!!!' * 100)
             aux_emb = self._aux_vector_encoding(aux_vectors).unsqueeze(1) # [b, h, 1]
-            print(g.shape, aux_emb.shape)
+            print(g.shape, aux_emb.shape, aux_vectors.shape)
             g = g + aux_emb
 
         x, m_p, logs_p, x_mask = self.text_encoder(x, x_lengths, lang_emb=lang_emb)
