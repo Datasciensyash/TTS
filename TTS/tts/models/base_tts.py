@@ -326,11 +326,12 @@ class BaseTTS(BaseTrainerModel):
             else:
                 language_id_mapping = None
 
+            print('INITIALIZING          ' * 10)
             aux_vector_mapping = None
             if hasattr(self, "aux_embedding_manager") and self.aux_embedding_manager is not None:
                 aux_vector_mapping = self.aux_embedding_manager.embeddings
                 config.use_aux_vector_file = config.model_args.use_aux_vector_file
-
+            print(aux_vector_mapping)
 
             # init dataloader
             dataset = TTSDataset(
