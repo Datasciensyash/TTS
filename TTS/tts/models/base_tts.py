@@ -156,7 +156,7 @@ class BaseTTS(BaseTrainerModel):
                     speaker_id = self.speaker_manager.name_to_id[speaker_name]
 
         if hasattr(self, "aux_embedding_manager"):
-            if config.use_d_vector_file:
+            if config.use_aux_vector_file:
                 if speaker_name is None:
                     aux_vector = self.aux_embedding_manager.get_random_embedding()
                 else:
