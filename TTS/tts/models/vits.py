@@ -1506,6 +1506,7 @@ class Vits(BaseTTS):
             # print(aux_vector_mapping.keys())
             aux_vectors = [aux_vector_mapping[w]["embedding"] for w in batch["audio_unique_names"]]
             aux_vectors = torch.FloatTensor(aux_vectors)
+            print('AUX_VECTORS ----->', aux_vectors)
         else:
             aux_vectors = None
 
