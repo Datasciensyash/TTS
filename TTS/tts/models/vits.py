@@ -1029,7 +1029,10 @@ class Vits(BaseTTS):
         print('BOOP', self.args.aux_vector_dim, aux_vectors)
         if self.args.aux_vector_dim != 0 and aux_vectors is not None:
             # print('IT WORKED!!!' * 100)
-            aux_emb = self._aux_vector_encoding(aux_vectors).unsqueeze(1) # [b, h, 1]
+            if hasattr(self, '_aux_vector_encoding'):
+                aux_emb = self._aux_vector_encoding(aux_vectors).unsqueeze(1) # [b, h, 1]
+            else:
+                aux_emb = aux_vectors
             print(g.shape, aux_emb.shape, aux_vectors.shape)
             g = g + aux_emb
 
