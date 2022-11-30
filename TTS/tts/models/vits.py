@@ -1030,8 +1030,8 @@ class Vits(BaseTTS):
         # Add auxiliary vector to g-vector
         print('BOOP', self.args.aux_vector_dim, aux_vectors)
         if self.args.aux_vector_dim != 0 and aux_vectors is not None:
-            print('IT WORKED!!!' * 100)
-            aux_emb = self.emb_encoder(aux_vectors).unsqueeze(1) # [b, h, 1]
+            # print('IT WORKED!!!' * 100)
+            aux_emb = self._aux_vector_encoding(aux_vectors).unsqueeze(1) # [b, h, 1]
             g = g + aux_emb
 
         x, m_p, logs_p, x_mask = self.text_encoder(x, x_lengths, lang_emb=lang_emb)
