@@ -899,7 +899,7 @@ class Vits(BaseTTS):
             durations = aux_input["durations"]
 
         if "aux_vectors" in aux_input and aux_input["aux_vectors"] is not None:
-            aux_vectors = aux_input[aux_vectors]
+            aux_vectors = aux_input["aux_vectors"]
             if aux_vectors.ndim == 2:
                 aux_vectors = aux_vectors.unsqueeze_(0)
 
