@@ -1027,6 +1027,7 @@ class Vits(BaseTTS):
             lang_emb = self.emb_l(lid).unsqueeze(-1)
 
         # Add auxiliary vector to g-vector
+        print('BOOP', self.args.aux_vector_dim, aux_vectors)
         if self.args.aux_vector_dim != 0 and aux_vectors is not None:
             print('IT WORKED!!!' * 100)
             aux_emb = self.emb_encoder(aux_vectors).unsqueeze(1) # [b, h, 1]
