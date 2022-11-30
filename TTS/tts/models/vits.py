@@ -878,6 +878,7 @@ class Vits(BaseTTS):
 
     @staticmethod
     def _set_cond_input(aux_input: Dict):
+        print('AUX_INPUT', aux_input)
         """Set the speaker conditioning input based on the multi-speaker mode."""
         sid, g, lid, durations, aux_vectors = None, None, None, None, None
         if "speaker_ids" in aux_input and aux_input["speaker_ids"] is not None:
