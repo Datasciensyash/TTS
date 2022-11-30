@@ -1032,7 +1032,7 @@ class Vits(BaseTTS):
             if hasattr(self, '_aux_vector_encoding'):
                 aux_emb = self._aux_vector_encoding(aux_vectors).unsqueeze(1) # [b, h, 1]
             else:
-                aux_emb = aux_vectors
+                aux_emb = aux_vectors.unsqueeze(-1)
             print(g.shape, aux_emb.shape, aux_vectors.shape)
             g = g + aux_emb
 
