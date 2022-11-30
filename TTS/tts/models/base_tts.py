@@ -231,6 +231,7 @@ class BaseTTS(BaseTrainerModel):
         stop_targets = (stop_targets.sum(2) > 0.0).unsqueeze(2).float().squeeze(2)
         stop_target_lengths = torch.divide(mel_lengths, self.config.r).ceil_()
 
+        print('DATASET AUX VECTORS', aux_vectors)
         return {
             "text_input": text_input,
             "text_lengths": text_lengths,
