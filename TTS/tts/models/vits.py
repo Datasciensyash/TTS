@@ -635,9 +635,10 @@ class Vits(BaseTTS):
         tokenizer: "TTSTokenizer" = None,
         speaker_manager: SpeakerManager = None,
         language_manager: LanguageManager = None,
+        aux_embedding_manager: SpeakerManager = None,
     ):
 
-        super().__init__(config, ap, tokenizer, speaker_manager, language_manager)
+        super().__init__(config, ap, tokenizer, speaker_manager, language_manager, aux_embedding_manager=aux_embedding_manager)
 
         self.init_multispeaker(config)
         self.init_multilingual(config)
