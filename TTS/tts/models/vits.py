@@ -1277,7 +1277,12 @@ class Vits(BaseTTS):
                 spec,
                 spec_lens,
                 waveform,
-                aux_input={"d_vectors": d_vectors, "speaker_ids": speaker_ids, "language_ids": language_ids},
+                aux_input={
+                    "d_vectors": d_vectors,
+                    "speaker_ids": speaker_ids,
+                    "language_ids": language_ids,
+                    "aux_vectors": batch["aux_vectors"]
+                },
             )
 
             # cache tensors for the generator pass
