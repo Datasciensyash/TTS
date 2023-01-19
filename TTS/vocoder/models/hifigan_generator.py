@@ -232,6 +232,8 @@ class HifiganGenerator(torch.nn.Module):
         if not conv_post_weight_norm:
             remove_weight_norm(self.conv_post)
 
+        self.activation = nn.Mish()
+
     def forward(self, x, g=None):
         """
         Args:
@@ -249,7 +251,7 @@ class HifiganGenerator(torch.nn.Module):
         if hasattr(self, "cond_layer"):
             o = o + self.cond_layer(g)
         for i in range(self.num_upsamples):
-            o = F.leaky_relu(o, LRELU_SLOPE)
+            o = self.activation(o)
             o = self.ups[i](o)
             z_sum = None
             for j in range(self.num_kernels):
@@ -258,7 +260,7 @@ class HifiganGenerator(torch.nn.Module):
                 else:
                     z_sum += self.resblocks[i * self.num_kernels + j](o)
             o = z_sum / self.num_kernels
-        o = F.leaky_relu(o)
+        o = self.activation(o)
         o = self.conv_post(o)
         o = torch.tanh(o)
         return o
