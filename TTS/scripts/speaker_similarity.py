@@ -104,7 +104,7 @@ def compute_speaker_similarity(
         for text in texts:
             with tempfile.SpooledTemporaryFile() as temp_file:
                 audio = vits_eval_interface(text, speaker_embedding)
-                sf.write(audio, temp_file, vits_eval_interface.sampling_rate)
+                sf.write(temp_file, audio, vits_eval_interface.sampling_rate)
                 _speaker_embedding = (
                     vits_eval_interface.get_speaker_embedding_from_file(
                         temp_file
