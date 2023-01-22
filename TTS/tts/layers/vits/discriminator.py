@@ -1,4 +1,6 @@
 import torch
+import torch.nn.functional as functional
+
 from torch import nn
 from torch.nn.modules.conv import Conv1d
 
@@ -47,6 +49,72 @@ class DiscriminatorS(torch.nn.Module):
         return x, feat
 
 
+class DiscriminatorR(torch.nn.Module):
+    """UnivNet Discriminator. Computes the discriminator score for a given input."""
+
+    def __init__(
+            self,
+            use_spectral_norm: bool = False,
+            fft_size: int = 1024,
+            win_size: int = 800,
+            hop_size: int = 200,
+            use_harmonic_conv: bool = False,
+    ):
+        super(DiscriminatorR, self).__init__()
+
+        self.fft_size = fft_size
+        self.win_size = win_size
+        self.hop_size = hop_size
+
+        self.activation = nn.LeakyReLU(0.2)
+
+        norm_f = nn.utils.spectral_norm if use_spectral_norm else nn.utils.weight_norm
+
+        self.convs = nn.ModuleList([
+            norm_f(nn.Conv2d(1, 32, (3, 9), padding=(1, 4))),
+            norm_f(nn.Conv2d(32, 32, (3, 9), stride=(1, 2), padding=(1, 4))),
+            norm_f(nn.Conv2d(32, 32, (3, 9), stride=(1, 2), padding=(1, 4))),
+            norm_f(nn.Conv2d(32, 32, (3, 9), stride=(1, 2), padding=(1, 4))),
+            norm_f(nn.Conv2d(32, 32, (3, 3), padding=(1, 1))),
+        ])
+        self.conv_post = norm_f(nn.Conv2d(32, 1, (3, 3), padding=(1, 1)))
+
+        if use_harmonic_conv:
+            import harmonic_conv
+            self.convs[0] = harmonic_conv.SingleHarmonicConv2d(
+                1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zero"
+            )
+
+    def forward(self, x: torch.Tensor):
+        """
+        Args:
+            x (Tensor): input waveform.
+
+        Returns:
+            Tensor: discriminator scores.
+            List[Tensor]: list of features from the convolutiona layers.
+        """
+        fmap = []
+
+        x = self._compute_spectrogram(x)
+        x = x.unsqueeze(1)
+        for l in self.convs:
+            x = l(x)
+            x = self.activation(x, self.LRELU_SLOPE)
+            fmap.append(x)
+        x = self.conv_post(x)
+        fmap.append(x)
+        x = torch.flatten(x, 1, -1)
+
+        return x, fmap
+
+    def _compute_spectrogram(self, x: torch.Tensor) -> torch.Tensor:
+        x = functional.pad(x, (int((self.fft_size - self.hop_size) / 2), int((self.fft_size - self.hop_size) / 2)), mode='reflect')
+        x = x.squeeze(1)
+        x = torch.stft(x, n_fft=self.fft_size, hop_length=self.hop_size, win_length=self.win_size, center=False) #[B, F, TT, 2]
+        return torch.norm(x, p=2, dim=-1)
+
+
 class VitsDiscriminator(nn.Module):
     """VITS discriminator wrapping one Scale Discriminator and a stack of Period Discriminator.
 
@@ -58,11 +126,22 @@ class VitsDiscriminator(nn.Module):
         use_spectral_norm (bool): if `True` swith to spectral norm instead of weight norm.
     """
 
-    def __init__(self, periods=(2, 3, 5, 7, 11), use_spectral_norm=False):
+    def __init__(self, periods=(2, 3, 5, 7, 11), use_spectral_norm=False, use_r_discriminator=False):
         super().__init__()
         self.nets = nn.ModuleList()
         self.nets.append(DiscriminatorS(use_spectral_norm=use_spectral_norm))
         self.nets.extend([DiscriminatorP(i, use_spectral_norm=use_spectral_norm) for i in periods])
+
+        if use_r_discriminator:
+            fft_params = [(1024, 120, 600), (2048, 240, 1200), (512, 50, 240)]
+            self.nets.extend([
+                DiscriminatorR(
+                    use_spectral_norm=use_spectral_norm,
+                    fft_size=fft_size,
+                    win_size=win_size,
+                    hop_size=hop_size
+                ) for fft_size, win_size, hop_size in fft_params
+            ])
 
     def forward(self, x, x_hat=None):
         """
