@@ -1,4 +1,4 @@
-name: zoo-tests
+name: zoo-tests-1
 
 on:
   push:
@@ -21,9 +21,9 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"]
         experimental: [false]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: coqui-ai/setup-python@pip-cache-key-py-ver
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: 'requirements*'
       - name: check OS
         run: cat /etc/os-release
+      - name: set ENV
+        run: export TRAINER_TELEMETRY=0
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -47,4 +49,4 @@ jobs:
           python3 -m pip install .[all]
           python3 setup.py egg_info
       - name: Unit tests
-        run: make test_zoo
+        run: nose2 -F -v -B --with-coverage --coverage TTS tests.zoo_tests.test_models.test_models_offset_1_step_3
