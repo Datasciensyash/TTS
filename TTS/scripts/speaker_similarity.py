@@ -9,6 +9,9 @@ from tqdm import tqdm
 
 from TTS.vits_eval_interface import VITSEvalInterface
 
+# TODO: I think that is bad idea
+TMP_FILENAME = "tmp.wav"
+
 
 def parse_args() -> argparse.Namespace:
     arguments_parser = argparse.ArgumentParser(
@@ -102,16 +105,15 @@ def compute_speaker_similarity(
             speaker_embedding = np.load(speaker_embedding_path)
 
         for text in texts:
-            with tempfile.SpooledTemporaryFile() as temp_file:
-                audio = vits_eval_interface(text, speaker_embedding)
-                sf.write(temp_file, audio, vits_eval_interface.sampling_rate)
-                _speaker_embedding = (
-                    vits_eval_interface.get_speaker_embedding_from_file(
-                        temp_file
-                    )
+            audio = vits_eval_interface(text, speaker_embedding)
+            sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
+            _speaker_embedding = (
+                vits_eval_interface.get_speaker_embedding_from_file(
+                    Path(TMP_FILENAME)
                 )
-                distance = cosine(speaker_embedding, _speaker_embedding)
-                distances.append(distance)
+            )
+            distance = cosine(speaker_embedding, _speaker_embedding)
+            distances.append(distance)
 
         speaker_distances.append(np.mean(distances))
 
