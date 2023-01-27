@@ -92,7 +92,7 @@ def compute_speaker_similarity(
         distances = []
 
         # TODO: flac -> wav & flac & mp3
-        audio_files = list(speaker_dir.glob("*.flac"))
+        audio_files = list(speaker_dir.glob("*.wav"))
 
         speaker_embedding_path = speaker_dir / "speaker_embedding.npy"
 
