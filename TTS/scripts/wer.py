@@ -115,7 +115,13 @@ def compute_wer(
             if audio_file.with_suffix(".txt").exists():
                 text = audio_file.with_suffix(".txt").read_text()
             else:
-                text = model.transcribe(str(audio_file))['segments'][0]['text']
+
+                try:
+                    text = model.transcribe(str(audio_file))['segments'][0]['text']
+                except IndexError:
+                    progress_bar.update(1)
+                    continue
+
                 audio_file.with_suffix(".txt").write_text(text)
 
             # Infer TTS model
