@@ -3,10 +3,13 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from scipy.spatial.distance import cosine
 from tqdm import tqdm
 
+from thefuzz import fuzz
+
 from TTS.vits_eval_interface import VITSEvalInterface
+
+import whisperx
 
 # TODO: I think that is bad idea
 TMP_FILENAME = "tmp.wav"
@@ -54,23 +57,23 @@ def parse_args() -> argparse.Namespace:
         required=True,
     )
     arguments_parser.add_argument(
-        "-txt",
-        "--texts_file",
-        help="Path to the file with texts",
-        type=Path,
+        "-w",
+        "--whisper_model",
+        help="Name of the whisper model",
+        type=str,
+        default="base.en",
         required=False,
-        default=Path(__file__).parent / "texts_spk_sim.txt",
     )
     return arguments_parser.parse_args()
 
 
-def compute_speaker_similarity(
+def compute_wer(
     input_dir: Path,
     device: str,
     model_root_dir: Path,
     speaker_encoder_checkpoint_path: Path,
     checkpoint_name: str = "best_model.pth",
-    texts_file=Path(__file__).parent / "texts_spk_sim.txt",
+    whisper_model: str = "base.en",
 ) -> None:
     vits_eval_interface = VITSEvalInterface(
         device=device,
@@ -78,17 +81,19 @@ def compute_speaker_similarity(
         speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
         checkpoint_name=checkpoint_name,
     )
-    texts = texts_file.read_text().splitlines()
 
-    speaker_distances = []
+    # Compute levenshetin distance between original and generated texts
+    model = whisperx.load_model(whisper_model, device)
+
+    fuzzy_ratios = []
     for speaker_dir in tqdm(
         input_dir.iterdir(),
-        desc="Computing speaker similarity for each speaker...",
+        desc="Computing WER for each speaker...",
     ):
         if not speaker_dir.is_dir():
             continue
 
-        distances = []
+        fuzzy_ratios_speaker = []
 
         # TODO: flac -> wav & flac & mp3
         audio_files = list(speaker_dir.rglob("*.wav"))
@@ -103,31 +108,39 @@ def compute_speaker_similarity(
         else:
             speaker_embedding = np.load(speaker_embedding_path)
 
-        for text in texts:
+        for audio_file in audio_files:
+
+            if audio_file.with_suffix(".txt").exists():
+                text = audio_file.with_suffix(".txt").read_text()
+            else:
+                text = model.transcribe(audio_file)['segments'][0]['text']
+                audio_file.with_suffix(".txt").write_text(text)
+
+            # Infer TTS model
             audio = vits_eval_interface(text, speaker_embedding)
             sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
-            _speaker_embedding = (
-                vits_eval_interface.get_speaker_embedding_from_file(
-                    Path(TMP_FILENAME)
-                )
-            )
-            distance = cosine(speaker_embedding, _speaker_embedding)
-            distances.append(distance)
 
-        speaker_distances.append(np.mean(distances))
+            # Infer whisper model
+            text_predicted = model.transcribe(TMP_FILENAME)['segments']
 
-    print(f"Speaker similarity: {np.mean(speaker_distances)}")
+            # Compute levenshtein distance
+            fuzzy_ratio = fuzz.ratio(text, text_predicted)
+            fuzzy_ratios_speaker.append(fuzzy_ratio)
+
+        fuzzy_ratios.extend(fuzzy_ratios_speaker)
+
+    print(f"Fuzzy ratio (higher is better): {np.mean(fuzzy_ratios)}")
 
 
 def main():
     args = parse_args()
-    compute_speaker_similarity(
+    compute_wer(
         input_dir=args.input_dir,
         device=args.device,
         model_root_dir=args.model_root_dir,
         speaker_encoder_checkpoint_path=args.speaker_encoder_checkpoint_path,
         checkpoint_name=args.checkpoint_name,
-        texts_file=args.texts_file,
+        whisper_model=args.whisper_model,
     )
 
 
