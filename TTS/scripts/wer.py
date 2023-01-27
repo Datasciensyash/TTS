@@ -85,11 +85,13 @@ def compute_wer(
     # Compute levenshetin distance between original and generated texts
     model = whisperx.load_model(whisper_model, device)
 
-    fuzzy_ratios = []
-    for speaker_dir in tqdm(
-        input_dir.iterdir(),
+    progress_bar = tqdm(
         desc="Computing WER for each speaker...",
-    ):
+        total=len(list(input_dir.rglob('*.wav')))
+    )
+
+    fuzzy_ratios = []
+    for speaker_dir in input_dir.iterdir():
         if not speaker_dir.is_dir():
             continue
 
@@ -126,6 +128,8 @@ def compute_wer(
             # Compute levenshtein distance
             fuzzy_ratio = fuzz.ratio(text, text_predicted)
             fuzzy_ratios_speaker.append(fuzzy_ratio)
+
+            progress_bar.update(1)
 
         fuzzy_ratios.extend(fuzzy_ratios_speaker)
 
