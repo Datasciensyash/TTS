@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
         "--whisper_model",
         help="Name of the whisper model",
         type=str,
-        default="base.en",
+        default="large",
         required=False,
     )
     return arguments_parser.parse_args()
