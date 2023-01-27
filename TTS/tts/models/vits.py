@@ -1,4 +1,5 @@
 import math
+import random
 import os
 from dataclasses import dataclass, field, replace
 from itertools import chain
@@ -595,6 +596,7 @@ class VitsArgs(Coqpit):
     interpolate_z: bool = True
     reinit_DP: bool = False
     reinit_text_encoder: bool = False
+    use_bucket_sampler: bool = True
 
 
 class Vits(BaseTTS):
@@ -1563,11 +1565,16 @@ class Vits(BaseTTS):
 
         if weights is not None:
             w_sampler = WeightedRandomSampler(weights, len(weights))
+
+            sort_key = lambda x: os.path.getsize(x["audio_file"])
+            if not self.args.use_bucket_sampler:
+                sort_key = lambda x: random.random()
+
             batch_sampler = BucketBatchSampler(
                 w_sampler,
                 data=data_items,
                 batch_size=config.eval_batch_size if is_eval else config.batch_size,
-                sort_key=lambda x: os.path.getsize(x["audio_file"]),
+                sort_key=sort_key,
                 drop_last=True,
             )
         else:
