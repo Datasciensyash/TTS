@@ -1569,6 +1569,7 @@ class Vits(BaseTTS):
             sort_key = lambda x: os.path.getsize(x["audio_file"])
             if not self.args.use_bucket_sampler:
                 batch_sampler = None
+                print('[! WARNING !] Not using Bucket Sampler')
             else:
                 batch_sampler = BucketBatchSampler(
                     w_sampler,
