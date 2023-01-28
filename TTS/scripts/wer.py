@@ -11,6 +11,10 @@ from TTS.vits_eval_interface import VITSEvalInterface
 
 import whisperx
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+
 # TODO: I think that is bad idea
 TMP_FILENAME = "tmp.wav"
 

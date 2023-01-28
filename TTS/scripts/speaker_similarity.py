@@ -116,7 +116,7 @@ def compute_speaker_similarity(
 
         speaker_distances.append(np.mean(distances))
 
-    print(f"Speaker similarity: {np.mean(speaker_distances)}")
+    print(f"Speaker similarity: {1 - np.mean(speaker_distances)}")
 
 
 def main():
