@@ -1568,15 +1568,15 @@ class Vits(BaseTTS):
 
             sort_key = lambda x: os.path.getsize(x["audio_file"])
             if not self.args.use_bucket_sampler:
-                sort_key = lambda x: random.random()
-
-            batch_sampler = BucketBatchSampler(
-                w_sampler,
-                data=data_items,
-                batch_size=config.eval_batch_size if is_eval else config.batch_size,
-                sort_key=sort_key,
-                drop_last=True,
-            )
+                batch_sampler = None
+            else:
+                batch_sampler = BucketBatchSampler(
+                    w_sampler,
+                    data=data_items,
+                    batch_size=config.eval_batch_size if is_eval else config.batch_size,
+                    sort_key=sort_key,
+                    drop_last=True,
+                )
         else:
             batch_sampler = None
         # sampler for DDP
