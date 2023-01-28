@@ -129,7 +129,7 @@ def compute_wer(
             sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
 
             # Infer whisper model
-            text_predicted = model.transcribe(TMP_FILENAME)['segments']
+            text_predicted = model.transcribe(TMP_FILENAME)['segments'][0]['text']
 
             # Compute levenshtein distance
             fuzzy_ratio = fuzz.ratio(text, text_predicted)
