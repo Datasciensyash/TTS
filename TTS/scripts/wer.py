@@ -137,12 +137,12 @@ def compute_wer(
             original_texts.append(text)
             predicted_texts.append(predicted_text)
 
-        cer = fastwer.score(original_texts, predicted_texts, char_level=True)
-        wer = fastwer.score(original_texts, predicted_texts, char_level=False)
+    cer = fastwer.score(original_texts, predicted_texts, char_level=True)
+    wer = fastwer.score(original_texts, predicted_texts, char_level=False)
 
-        print(f"WER: {wer} | CER: {cer}")
+    print(f"WER: {wer} | CER: {cer}")
 
-        return wer, cer
+    return wer, cer
 
 
 def main():
