@@ -59,7 +59,7 @@ def parse_args() -> argparse.Namespace:
         help="Path to the file with texts",
         type=Path,
         required=False,
-        default=Path(__file__).parent / "texts_spk_sim.txt",
+        default=Path(__file__).parent / "script_data" / "texts_spk_sim.txt",
     )
     return arguments_parser.parse_args()
 
@@ -70,7 +70,7 @@ def compute_speaker_similarity(
     model_root_dir: Path,
     speaker_encoder_checkpoint_path: Path,
     checkpoint_name: str = "best_model.pth",
-    texts_file=Path(__file__).parent / "texts_spk_sim.txt",
+    texts_file: Path = Path(__file__).parent / "script_data" / "texts_spk_sim.txt",
 ) -> None:
     vits_eval_interface = VITSEvalInterface(
         device=device,
@@ -117,6 +117,8 @@ def compute_speaker_similarity(
         speaker_distances.append(np.mean(distances))
 
     print(f"Speaker similarity: {1 - np.mean(speaker_distances)}")
+
+    return 1 - np.mean(speaker_distances)
 
 
 def main():
