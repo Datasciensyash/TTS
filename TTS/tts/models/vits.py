@@ -1628,6 +1628,7 @@ class Vits(BaseTTS):
             # get samplers
             sampler = self.get_sampler(config, dataset, num_gpus)
             if sampler is None:
+                print('[! WARNING !] Not using Sampler')
                 loader = DataLoader(
                     dataset,
                     batch_size=config.eval_batch_size if is_eval else config.batch_size,
