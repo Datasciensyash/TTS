@@ -7,12 +7,10 @@ import pandas as pd
 import soundfile as sf
 from tqdm import tqdm
 
-import fastwer
 
 from TTS.vits_eval_interface import VITSEvalInterface
 from nisqa.model import nisqaModel, NISQA_WEIGHTS_DIR
 
-import whisperx
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
