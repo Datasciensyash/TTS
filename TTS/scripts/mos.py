@@ -140,7 +140,7 @@ def compute_mos_nisqa(
 
 
     df = pd.DataFrame(output_file_names, columns=[COLUMN_NAME])
-    df.to_csv(TMP_CSV_FILE_NAME)
+    df.to_csv(Path(OUTPUT_DIR) / TMP_CSV_FILE_NAME)
 
     nisqa = nisqaModel(NISQA_ARGS)
     pred = nisqa.predict()
