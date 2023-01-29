@@ -26,7 +26,7 @@ COLUMN_NAME = "audio"
 OUT_COLUMNS = ["mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"]
 
 NISQA_ARGS = {
-    "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa.tar"),
+    "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa_tts.tar"),
     "mode": 'predict_csv',
     "csv_deg": COLUMN_NAME,
     "csv_file": TMP_CSV_FILE_NAME,
