@@ -119,7 +119,7 @@ def compute_mos_nisqa(
 
     output_file_names = []
     speaker_directories = [spk_dir for spk_dir in input_dir.iterdir() if spk_dir.is_dir()]
-    for speaker_dir in tqdm(speaker_directories[:max_speakers_num], desc="Computing WER..."):
+    for speaker_dir in tqdm(speaker_directories[:max_speakers_num], desc="TTS Inference..."):
 
         audio_files = list(speaker_dir.rglob("*.wav"))
         speaker_embedding_path = speaker_dir / "speaker_embedding.npy"
