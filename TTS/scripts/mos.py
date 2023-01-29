@@ -26,7 +26,7 @@ COLUMN_NAME = "audio"
 OUT_COLUMNS = ["mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"]
 
 NISQA_ARGS = {
-    "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa_tts.tar"),
+    "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa.tar"),
     "mode": 'predict_csv',
     "csv_deg": COLUMN_NAME,
     "csv_file": TMP_CSV_FILE_NAME,
@@ -145,6 +145,7 @@ def compute_mos_nisqa(
     nisqa = nisqaModel(NISQA_ARGS)
     nisqa_predictions = nisqa.predict()[OUT_COLUMNS].mean()
 
+    print('\nPredictions:')
     print(nisqa_predictions)
 
     return nisqa_predictions.tolist()
