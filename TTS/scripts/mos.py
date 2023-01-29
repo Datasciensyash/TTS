@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 
 from TTS.vits_eval_interface import VITSEvalInterface
-from nisqa.model import nisqaModel, NISQA_WEIGHTS_DIR
+from nisqa import NISQA_WEIGHTS_DIR
+from nisqa.model import nisqaModel
 
 
 import warnings
