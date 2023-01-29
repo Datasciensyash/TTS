@@ -111,7 +111,7 @@ def compute_mos_nisqa(
         checkpoint_name=checkpoint_name,
     )
 
-    tmp_output_dir = Path(OUTPUT_DIR) / NISQA_MODEL_NAME
+    tmp_output_dir = Path(NISQA_MODEL_NAME)
     tmp_output_dir.mkdir(parents=True, exist_ok=True)
 
     test_texts = texts_file.read_text().splitlines()
@@ -137,7 +137,6 @@ def compute_mos_nisqa(
             output_file_names.append(audio_name)
 
             sf.write(tmp_output_dir / audio_name, audio, vits_eval_interface.sampling_rate)
-
 
     df = pd.DataFrame(output_file_names, columns=[COLUMN_NAME])
     df.to_csv(Path(NISQA_MODEL_NAME) / TMP_CSV_FILE_NAME)
