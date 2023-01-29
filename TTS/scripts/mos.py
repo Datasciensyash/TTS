@@ -139,7 +139,7 @@ def compute_mos_nisqa(
             sf.write(tmp_output_dir / audio_name, audio, vits_eval_interface.sampling_rate)
 
 
-    df = pd.DataFrame([output_file_names], columns=[COLUMN_NAME])
+    df = pd.DataFrame(output_file_names, columns=[COLUMN_NAME])
     df.to_csv(TMP_CSV_FILE_NAME)
 
     nisqa = nisqaModel(NISQA_ARGS)
