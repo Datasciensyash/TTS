@@ -23,6 +23,7 @@ TMP_CSV_FILE_NAME = "nisqa.csv"
 OUTPUT_DIR = "nisqa_results"
 NISQA_MODEL_NAME = "tmp_model_name"
 COLUMN_NAME = "audio"
+OUT_COLUMNS = ["mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"]
 
 NISQA_ARGS = {
     "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa.tar"),
@@ -103,7 +104,7 @@ def compute_mos_nisqa(
     checkpoint_name: str = "best_model.pth",
     max_speakers_num: int = 10,
     texts_file: Path = Path(__file__).parent / "script_data" / "test_small.txt",
-) -> Tuple[float, float]:
+) -> Tuple[float, float, float, float, float]:
     vits_eval_interface = VITSEvalInterface(
         device=device,
         model_root_dir=model_root_dir,
@@ -142,11 +143,11 @@ def compute_mos_nisqa(
     df.to_csv(Path(NISQA_MODEL_NAME) / TMP_CSV_FILE_NAME)
 
     nisqa = nisqaModel(NISQA_ARGS)
-    pred = nisqa.predict()
+    nisqa_predictions = nisqa.predict()[OUT_COLUMNS].mean()
 
-    print(pred)
+    print(nisqa_predictions)
 
-    return None
+    return nisqa_predictions.tolist()
 
 
 def main():
