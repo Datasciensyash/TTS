@@ -112,7 +112,7 @@ def compute_mos_nisqa(
     )
 
     tmp_output_dir = Path(OUTPUT_DIR) / NISQA_MODEL_NAME
-    tmp_output_dir.mkdir(parents=True)
+    tmp_output_dir.mkdir(parents=True, exist_ok=True)
 
     test_texts = texts_file.read_text().splitlines()
 
