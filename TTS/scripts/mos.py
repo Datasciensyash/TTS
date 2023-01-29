@@ -91,7 +91,7 @@ def parse_args() -> argparse.Namespace:
         help="Path to the file with texts",
         type=Path,
         required=False,
-        default=Path(__file__).parent / "script_data" / "wer_default.txt",
+        default=Path(__file__).parent / "script_data" / "test_small.txt",
     )
     return arguments_parser.parse_args()
 
@@ -103,7 +103,7 @@ def compute_mos_nisqa(
     speaker_encoder_checkpoint_path: Path,
     checkpoint_name: str = "best_model.pth",
     max_speakers_num: int = 10,
-    texts_file: Path = Path(__file__).parent / "script_data" / "wer_default.txt",
+    texts_file: Path = Path(__file__).parent / "script_data" / "test_small.txt",
 ) -> Tuple[float, float]:
     vits_eval_interface = VITSEvalInterface(
         device=device,
