@@ -86,7 +86,7 @@ class DiscriminatorR(torch.nn.Module):
             sys.path.append(str(Path(__file__).parent))
             import harmonic_conv
             self.convs[0] = harmonic_conv.SingleHarmonicConv2d(
-                1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zero"
+                1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zeros"
             )
 
     def forward(self, x: torch.Tensor):
