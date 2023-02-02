@@ -104,7 +104,7 @@ class DiscriminatorR(torch.nn.Module):
         x = x.unsqueeze(1)
         for l in self.convs:
             x = l(x)
-            x = self.activation(x, self.LRELU_SLOPE)
+            x = self.activation(x)
             fmap.append(x)
         x = self.conv_post(x)
         fmap.append(x)
