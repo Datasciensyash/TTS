@@ -36,6 +36,7 @@ from TTS.tts.utils.visual import plot_alignment
 from TTS.utils.io import load_fsspec
 from TTS.utils.samplers import BucketBatchSampler
 from TTS.vocoder.models.hifigan_generator import HifiganGenerator
+from TTS.vocoder.models.univnet_generator import UnivnetGenerator
 from TTS.vocoder.utils.generic_utils import plot_results
 
 ##############################
@@ -701,20 +702,18 @@ class Vits(BaseTTS):
                 language_emb_dim=self.embedded_language_dim,
             )
 
-        self.waveform_decoder = HifiganGenerator(
-            self.args.hidden_channels,
-            1,
-            self.args.resblock_type_decoder,
-            self.args.resblock_dilation_sizes_decoder,
-            self.args.resblock_kernel_sizes_decoder,
-            self.args.upsample_kernel_sizes_decoder,
-            self.args.upsample_initial_channel_decoder,
-            self.args.upsample_rates_decoder,
-            inference_padding=0,
+        self.waveform_decoder = UnivnetGenerator(
+            in_channels=self.args.hidden_channels,
+            hidden_channels=16,
+            out_channels=1,
+            upsample_factors=self.args.upsample_rates_decoder,
             cond_channels=self.embedded_speaker_dim,
-            conv_pre_weight_norm=False,
-            conv_post_weight_norm=False,
-            conv_post_bias=False,
+            lvc_layers_each_block=4,
+            lvc_kernel_size=3,
+            kpnet_hidden_channels=64,
+            kpnet_conv_size=3,
+            dropout=0.0,
+            use_weight_norm=True,
         )
 
         if self.args.init_discriminator:
