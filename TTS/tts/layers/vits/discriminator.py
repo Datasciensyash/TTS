@@ -1,3 +1,5 @@
+import sys
+
 import torch
 import torch.nn.functional as functional
 
@@ -80,6 +82,8 @@ class DiscriminatorR(torch.nn.Module):
         self.conv_post = norm_f(nn.Conv2d(32, 1, (3, 3), padding=(1, 1)))
 
         if use_harmonic_conv:
+            from pathlib import Path
+            sys.path.append(str(Path(__file__).parent))
             import harmonic_conv
             self.convs[0] = harmonic_conv.SingleHarmonicConv2d(
                 1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zero"
