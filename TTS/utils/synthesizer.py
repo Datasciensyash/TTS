@@ -62,7 +62,6 @@ class Synthesizer(object):
         self.tts_model = None
         self.vocoder_model = None
         self.speaker_manager = None
-        self.num_speakers = 0
         self.tts_speakers = {}
         self.language_manager = None
         self.num_languages = 0
@@ -213,7 +212,12 @@ class Synthesizer(object):
         speaker_embedding = None
         speaker_id = None
         if self.tts_speakers_file or hasattr(self.tts_model.speaker_manager, "name_to_id"):
-            if speaker_name and isinstance(speaker_name, str):
+
+            # handle Neon models with single speaker.
+            if len(self.tts_model.speaker_manager.name_to_id) == 1:
+                speaker_id = list(self.tts_model.speaker_manager.name_to_id.values())[0]
+
+            elif speaker_name and isinstance(speaker_name, str):
                 if self.tts_config.use_d_vector_file:
                     # get the average speaker embedding from the saved d_vectors.
                     speaker_embedding = self.tts_model.speaker_manager.get_mean_embedding(
@@ -243,7 +247,11 @@ class Synthesizer(object):
         if self.tts_languages_file or (
             hasattr(self.tts_model, "language_manager") and self.tts_model.language_manager is not None
         ):
-            if language_name and isinstance(language_name, str):
+
+            if len(self.tts_model.language_manager.name_to_id) == 1:
+                language_id = list(self.tts_model.language_manager.name_to_id.values())[0]
+
+            elif language_name and isinstance(language_name, str):
                 language_id = self.tts_model.language_manager.name_to_id[language_name]
 
             elif not language_name:

@@ -1,4 +1,5 @@
 import math
+import random
 import os
 from dataclasses import dataclass, field, replace
 from itertools import chain
@@ -477,8 +478,8 @@ class VitsArgs(Coqpit):
         use_d_vector_file (bool):
             Enable/Disable the use of d-vectors for multi-speaker training. Defaults to False.
 
-        d_vector_file (str):
-            Path to the file including pre-computed speaker embeddings. Defaults to None.
+        d_vector_file (List[str]):
+            List of paths to the files including pre-computed speaker embeddings. Defaults to None.
 
         d_vector_dim (int):
             Number of d-vector channels. Defaults to 0.
@@ -573,7 +574,7 @@ class VitsArgs(Coqpit):
     use_speaker_embedding: bool = False
     num_speakers: int = 0
     speakers_file: str = None
-    d_vector_file: str = None
+    d_vector_file: List[str] = None
     speaker_embedding_channels: int = 256
     use_d_vector_file: bool = False
     d_vector_dim: int = 0
@@ -595,6 +596,7 @@ class VitsArgs(Coqpit):
     interpolate_z: bool = True
     reinit_DP: bool = False
     reinit_text_encoder: bool = False
+    use_bucket_sampler: bool = True
 
 
 class Vits(BaseTTS):
@@ -1211,8 +1213,8 @@ class Vits(BaseTTS):
         assert self.num_speakers > 0, "num_speakers have to be larger than 0."
         # speaker embedding
         if self.args.use_speaker_embedding and not self.args.use_d_vector_file:
-            g_src = self.emb_g(speaker_cond_src).unsqueeze(-1)
-            g_tgt = self.emb_g(speaker_cond_tgt).unsqueeze(-1)
+            g_src = self.emb_g(torch.from_numpy((np.array(speaker_cond_src))).unsqueeze(0)).unsqueeze(-1)
+            g_tgt = self.emb_g(torch.from_numpy((np.array(speaker_cond_tgt))).unsqueeze(0)).unsqueeze(-1)
         elif not self.args.use_speaker_embedding and self.args.use_d_vector_file:
             g_src = F.normalize(speaker_cond_src).unsqueeze(-1)
             g_tgt = F.normalize(speaker_cond_tgt).unsqueeze(-1)
@@ -1563,13 +1565,19 @@ class Vits(BaseTTS):
 
         if weights is not None:
             w_sampler = WeightedRandomSampler(weights, len(weights))
-            batch_sampler = BucketBatchSampler(
-                w_sampler,
-                data=data_items,
-                batch_size=config.eval_batch_size if is_eval else config.batch_size,
-                sort_key=lambda x: os.path.getsize(x["audio_file"]),
-                drop_last=True,
-            )
+
+            sort_key = lambda x: os.path.getsize(x["audio_file"])
+            if not self.args.use_bucket_sampler:
+                batch_sampler = None
+                print('[! WARNING !] Not using Bucket Sampler')
+            else:
+                batch_sampler = BucketBatchSampler(
+                    w_sampler,
+                    data=data_items,
+                    batch_size=config.eval_batch_size if is_eval else config.batch_size,
+                    sort_key=sort_key,
+                    drop_last=True,
+                )
         else:
             batch_sampler = None
         # sampler for DDP
@@ -1620,10 +1628,11 @@ class Vits(BaseTTS):
             # get samplers
             sampler = self.get_sampler(config, dataset, num_gpus)
             if sampler is None:
+                print('[! WARNING !] Not using Sampler')
                 loader = DataLoader(
                     dataset,
                     batch_size=config.eval_batch_size if is_eval else config.batch_size,
-                    shuffle=False,  # shuffle is done in the dataset.
+                    shuffle=True,  # shuffle is done in the dataset.
                     collate_fn=dataset.collate_fn,
                     drop_last=False,  # setting this False might cause issues in AMP training.
                     num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
@@ -1671,8 +1680,8 @@ class Vits(BaseTTS):
         Returns:
             List: Schedulers, one for each optimizer.
         """
-        scheduler_G = get_scheduler(self.config.lr_scheduler_gen, self.config.lr_scheduler_gen_params, optimizer[0])
-        scheduler_D = get_scheduler(self.config.lr_scheduler_disc, self.config.lr_scheduler_disc_params, optimizer[1])
+        scheduler_D = get_scheduler(self.config.lr_scheduler_disc, self.config.lr_scheduler_disc_params, optimizer[0])
+        scheduler_G = get_scheduler(self.config.lr_scheduler_gen, self.config.lr_scheduler_gen_params, optimizer[1])
         return [scheduler_D, scheduler_G]
 
     def get_criterion(self):
@@ -1686,14 +1695,10 @@ class Vits(BaseTTS):
         return [VitsDiscriminatorLoss(self.config), VitsGeneratorLoss(self.config)]
 
     def load_checkpoint(
-        self,
-        config,
-        checkpoint_path,
-        eval=False,
-        strict=True,
+        self, config, checkpoint_path, eval=False, strict=True, cache=False
     ):  # pylint: disable=unused-argument, redefined-builtin
         """Load the model checkpoint and setup for training or inference"""
-        state = load_fsspec(checkpoint_path, map_location=torch.device("cpu"))
+        state = load_fsspec(checkpoint_path, map_location=torch.device("cpu"), cache=cache)
         # compat band-aid for the pre-trained models to not use the encoder baked into the model
         # TODO: consider baking the speaker encoder into the model and call it from there.
         # as it is probably easier for model distribution.
