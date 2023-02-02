@@ -58,7 +58,7 @@ class DiscriminatorR(torch.nn.Module):
             fft_size: int = 1024,
             win_size: int = 800,
             hop_size: int = 200,
-            use_harmonic_conv: bool = False,
+            use_harmonic_conv: bool = True,
     ):
         super(DiscriminatorR, self).__init__()
 
