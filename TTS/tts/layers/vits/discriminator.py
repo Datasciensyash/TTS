@@ -129,7 +129,7 @@ class VitsDiscriminator(nn.Module):
     def __init__(self, periods=(2, 3, 5, 7, 11), use_spectral_norm=False, use_r_discriminator=True):
         super().__init__()
         self.nets = nn.ModuleList()
-        # self.nets.append(DiscriminatorS(use_spectral_norm=use_spectral_norm))
+        self.nets.append(DiscriminatorS(use_spectral_norm=use_spectral_norm))
         self.nets.extend([DiscriminatorP(i, use_spectral_norm=use_spectral_norm) for i in periods])
 
         if use_r_discriminator:
@@ -157,7 +157,9 @@ class VitsDiscriminator(nn.Module):
         x_hat_scores = [] if x_hat is not None else None
         x_feats = []
         x_hat_feats = [] if x_hat is not None else None
-        for net in self.nets:
+
+        # TODO: Remove self.nets[1] (DiscriminatorS)
+        for net in self.nets[1:]:
             x_score, x_feat = net(x)
             x_scores.append(x_score)
             x_feats.append(x_feat)
