@@ -81,23 +81,14 @@ class DiscriminatorR(torch.nn.Module):
         ])
         self.conv_post = norm_f(nn.Conv2d(32, 1, (3, 3), padding=(1, 1)))
 
-        self._raise_e = False
-        # TODO: Shittiest code i EVER created.
         if use_harmonic_conv:
             from pathlib import Path
             sys.path.append(str(Path(__file__).parent))
+            import harmonic_conv
+            self.convs[0] = harmonic_conv.SingleHarmonicConv2d(
+                1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zeros"
+            )
 
-            import os
-            try:
-                import harmonic_conv
-                self.convs[0] = harmonic_conv.SingleHarmonicConv2d(
-                    1, 32, 3, anchor=1, stride=1, padding=(0, 1), padding_mode="zeros"
-                )
-            except Exception as e:
-                if not os.environ.get("DO_NOT_USE_HCONV") == "YES":
-                    raise e
-                self._raise_e = True
-                print("Harmonic Convolution is not available. Falling back to normal convolutions.")
 
     def forward(self, x: torch.Tensor):
         """
@@ -108,10 +99,6 @@ class DiscriminatorR(torch.nn.Module):
             Tensor: discriminator scores.
             List[Tensor]: list of features from the convolutiona layers.
         """
-
-        if self._raise_e:
-            raise Exception("Harmonic Convolution is not available")
-
         fmap = []
 
         x = self._compute_spectrogram(x)
