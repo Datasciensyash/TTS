@@ -44,7 +44,7 @@ class VITSEvalInterface:
 
         self.model = setup_model(config=self.config)
         checkpoint = torch.load(model_root_dir / checkpoint_name, map_location=torch.device('cpu'))
-        self.model.load_state_dict(checkpoint["model"])
+        self.model.load_state_dict(checkpoint["model"], strict=False)
         self.model.eval()
 
         self.model.to(device)
