@@ -81,7 +81,7 @@ def default_model_test(
 
         for model_dir in model_dirs:
             # Find all checkpoints in the model root directory
-            checkpoint_paths = list(model_dir.rglob("*.pth"))
+            checkpoint_paths = [i for i in model_dir.rglob("*.pth") if i.stem != "speakers"]
 
             for checkpoint_path in checkpoint_paths:
                 checkpoint = checkpoint_path.name
