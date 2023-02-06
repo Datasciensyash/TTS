@@ -22,8 +22,8 @@ def parse_args() -> argparse.Namespace:
     )
     arguments_parser.add_argument(
         "-m",
-        "--model_root_dirs",
-        help="Paths to the model root directory",
+        "--model_dirs",
+        help="Paths to the models directories",
         type=Path,
         required=True,
         nargs="+",
@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
 
 def default_model_test(
     device: str,
-    model_root_dirs: List[Path],
+    model_dirs: List[Path],
     speaker_encoder_checkpoint_path: Path,
     input_dir: Path,
     out_csv: Path,
@@ -78,11 +78,15 @@ def default_model_test(
         columns += wer_names
 
         csvwriter.writerow(columns)
-        for model_root_dir in model_root_dirs:
-            # Find all checkpoints in the model root directory
-            checkpoints = [i.name for i in model_root_dir.glob("*.pth")]
 
-            for checkpoint in checkpoints:
+        for model_dir in model_dirs:
+            # Find all checkpoints in the model root directory
+            checkpoint_paths = list(model_dir.rglob("*.pth"))
+
+            for checkpoint_path in checkpoint_paths:
+                checkpoint = checkpoint_path.name
+                model_root_dir = checkpoint_path.parent
+
                 sentinel = (model_root_dir / checkpoint).with_suffix(".test.json")
                 if sentinel.exists():
                     continue
@@ -140,7 +144,7 @@ if __name__ == "__main__":
     args = parse_args()
     default_model_test(
         args.device,
-        args.model_root_dirs,
+        args.model_dirs,
         args.speaker_encoder_checkpoint_path,
         args.input_dir,
         args.out_csv,
