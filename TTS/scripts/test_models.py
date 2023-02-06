@@ -65,7 +65,7 @@ def default_model_test(
     wer_files = list((Path(__file__).parent / "script_data").glob("wer*.txt"))
 
     wer_names = []
-    for i in wer_names:
+    for i in wer_files:
         wer_names.extend((i.stem, i.stem.replace("wer_", "cer_")))
 
     columns = [
