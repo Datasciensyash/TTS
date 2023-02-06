@@ -70,8 +70,10 @@ def compute_speaker_similarity(
     model_root_dir: Path,
     speaker_encoder_checkpoint_path: Path,
     checkpoint_name: str = "best_model.pth",
-    texts_file: Path = Path(__file__).parent / "script_data" / "texts_spk_sim.txt",
-) -> None:
+    texts_file: Path = Path(__file__).parent
+    / "script_data"
+    / "texts_spk_sim.txt",
+) -> float:
     vits_eval_interface = VITSEvalInterface(
         device=device,
         model_root_dir=model_root_dir,
