@@ -1,4 +1,5 @@
 import argparse
+import random
 import warnings
 from pathlib import Path
 from typing import Tuple
@@ -16,6 +17,8 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # TODO: I think that is bad idea
 TMP_FILENAME = "tmp.wav"
+TMP_DIR = Path("./tmp")
+TMP_DIR.mkdir(exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -129,10 +132,12 @@ def compute_wer(
 
         for text in test_texts:
             audio = vits_eval_interface(text, speaker_embedding)
-            sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
+            tmp_fname = TMP_DIR / f"{random.randint(1, 1000)}.wav"
+
+            sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
 
             try:
-                predicted_text = asr_model.transcribe(TMP_FILENAME)["segments"][
+                predicted_text = asr_model.transcribe(tmp_fname)["segments"][
                     0
                 ]["text"]
 
