@@ -60,82 +60,80 @@ def default_model_test(
     input_dir: Path,
     out_csv: Path,
 ) -> None:
-    # Function Test MOS, speaker similarity, and WER
-    csvfile = open(out_csv, "w", newline="")
-    csvwriter = writer(csvfile)
+    with open(out_csv, "w", newline="") as csvfile:
+        csvwriter = writer(csvfile)
 
-    wer_files = list((Path(__file__).parent / "script_data").glob("wer*.txt"))
-    wer_names = [i.stem for i in wer_files]
+        wer_files = list((Path(__file__).parent / "script_data").glob("wer*.txt"))
+        wer_names = [i.stem for i in wer_files]
 
-    columns = [
-        "model",
-        "mos_pred",
-        "noi_pred",
-        "dis_pred",
-        "col_pred",
-        "loud_pred",
-        "speaker_similarity",
-    ]
-    columns += wer_names
+        columns = [
+            "model",
+            "mos_pred",
+            "noi_pred",
+            "dis_pred",
+            "col_pred",
+            "loud_pred",
+            "speaker_similarity",
+        ]
+        columns += wer_names
 
-    csvwriter.writerow(columns)
-    for model_root_dir in model_root_dirs:
-        # Find all checkpoints in the model root directory
-        checkpoints = [i.name for i in model_root_dir.glob("*.pth")]
+        csvwriter.writerow(columns)
+        for model_root_dir in model_root_dirs:
+            # Find all checkpoints in the model root directory
+            checkpoints = [i.name for i in model_root_dir.glob("*.pth")]
 
-        for checkpoint in checkpoints:
-            sentinel = (model_root_dir / checkpoint).with_suffix(".test.json")
-            if sentinel.exists():
-                continue
-            # Run MOS testing
-            # NOTE: compute_mos_nisqa returns Tuple[float, float, float, float, float]
-            # NOTE: compute_mos_nisqa returns Tuple of "mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"
-            mos_output = compute_mos_nisqa(
-                input_dir=input_dir,
-                model_root_dir=model_root_dir,
-                speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
-                checkpoint_name=checkpoint,
-                device=device,
-            )
-            mos_pred, noi_pred, dis_pred, col_pred, loud_pred = mos_output
-
-            # Run speaker similarity testing
-            speaker_similarity = compute_speaker_similarity(
-                input_dir=input_dir,
-                device=device,
-                model_root_dir=model_root_dir,
-                speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
-                checkpoint_name=checkpoint,
-            )
-            data_row = [
-                str(model_root_dir / checkpoint),
-                mos_pred,
-                noi_pred,
-                dis_pred,
-                col_pred,
-                loud_pred,
-                speaker_similarity,
-            ]
-
-            # Run WER testing
-            for file in wer_files:
-                wer, cer = compute_wer(
+            for checkpoint in checkpoints:
+                sentinel = (model_root_dir / checkpoint).with_suffix(".test.json")
+                if sentinel.exists():
+                    continue
+                # Run MOS testing
+                # NOTE: compute_mos_nisqa returns Tuple[float, float, float, float, float]
+                # NOTE: compute_mos_nisqa returns Tuple of "mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"
+                mos_output = compute_mos_nisqa(
                     input_dir=input_dir,
                     model_root_dir=model_root_dir,
                     speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
                     checkpoint_name=checkpoint,
                     device=device,
-                    texts_file=file,
                 )
-                data_row.append(wer)
-                data_row.append(cer)
+                mos_pred, noi_pred, dis_pred, col_pred, loud_pred = mos_output
 
-            csvwriter.writerow(data_row)
-            with sentinel.open("w") as f:
-                f.write(dict(zip(columns, data_row)))
+                # Run speaker similarity testing
+                speaker_similarity = compute_speaker_similarity(
+                    input_dir=input_dir,
+                    device=device,
+                    model_root_dir=model_root_dir,
+                    speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
+                    checkpoint_name=checkpoint,
+                )
+                data_row = [
+                    str(model_root_dir / checkpoint),
+                    mos_pred,
+                    noi_pred,
+                    dis_pred,
+                    col_pred,
+                    loud_pred,
+                    speaker_similarity,
+                ]
 
-    print(f"Test results are saved in {out_csv}")
-    csvfile.close()
+                # Run WER testing
+                for file in wer_files:
+                    wer, cer = compute_wer(
+                        input_dir=input_dir,
+                        model_root_dir=model_root_dir,
+                        speaker_encoder_checkpoint_path=speaker_encoder_checkpoint_path,
+                        checkpoint_name=checkpoint,
+                        device=device,
+                        texts_file=file,
+                    )
+                    data_row.append(wer)
+                    data_row.append(cer)
+
+                csvwriter.writerow(data_row)
+                with sentinel.open("w") as f:
+                    f.write(dict(zip(columns, data_row)))
+
+        print(f"Test results are saved in {out_csv}")
 
 
 if __name__ == "__main__":
