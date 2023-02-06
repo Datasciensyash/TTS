@@ -130,6 +130,7 @@ def default_model_test(
                         checkpoint_name=checkpoint,
                         device=device,
                         texts_file=file,
+                        max_speakers_num=2,
                     )
                     data_row.append(wer)
                     data_row.append(cer)

@@ -133,7 +133,7 @@ def compute_wer(
 
         for text in test_texts:
             audio = vits_eval_interface(text, speaker_embedding)
-            tmp_fname = TMP_DIR / f"{random.randint(1, 1000)}.wav"
+            tmp_fname = TMP_DIR / f"{random.randint(1, 100000)}.wav"
             sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
 
             try:
@@ -150,6 +150,10 @@ def compute_wer(
 
     cer = fastwer.score(original_texts, predicted_texts, char_level=True)
     wer = fastwer.score(original_texts, predicted_texts, char_level=False)
+
+    # Remove TMP DIR
+    for tmp_file in TMP_DIR.iterdir():
+        tmp_file.unlink()
 
     print(f"WER: {wer} | CER: {cer}")
 
