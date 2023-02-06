@@ -133,12 +133,11 @@ def compute_wer(
 
         for text in test_texts:
             audio = vits_eval_interface(text, speaker_embedding)
-            #tmp_fname = TMP_DIR / f"{random.randint(1, 1000)}.wav"
-
-            #sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
+            tmp_fname = TMP_DIR / f"{random.randint(1, 1000)}.wav"
+            sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
 
             try:
-                predicted_text = asr_model.transcribe(torch.Tensor(audio))["segments"][
+                predicted_text = asr_model.transcribe(str(tmp_fname))["segments"][
                     0
                 ]["text"]
 
