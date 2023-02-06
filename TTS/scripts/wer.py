@@ -1,18 +1,16 @@
 import argparse
+import warnings
 from pathlib import Path
 from typing import Tuple
 
+import fastwer
 import numpy as np
 import soundfile as sf
+import whisperx
 from tqdm import tqdm
-
-import fastwer
 
 from TTS.vits_eval_interface import VITSEvalInterface
 
-import whisperx
-
-import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
@@ -82,7 +80,7 @@ def parse_args() -> argparse.Namespace:
         "--whisper_model",
         help="Name of the whisper model",
         type=str,
-        default="large",
+        default="tiny.en",
         required=False,
     )
     return arguments_parser.parse_args()
@@ -94,9 +92,11 @@ def compute_wer(
     model_root_dir: Path,
     speaker_encoder_checkpoint_path: Path,
     checkpoint_name: str = "best_model.pth",
-    whisper_model: str = "base.en",
+    whisper_model: str = "tiny.en",
     max_speakers_num: int = 10,
-    texts_file: Path = Path(__file__).parent / "script_data" / "wer_default.txt",
+    texts_file: Path = Path(__file__).parent
+    / "script_data"
+    / "wer_default.txt",
 ) -> Tuple[float, float]:
     vits_eval_interface = VITSEvalInterface(
         device=device,
@@ -110,8 +110,12 @@ def compute_wer(
     test_texts = texts_file.read_text().splitlines()
 
     original_texts, predicted_texts = [], []
-    speaker_directories = [spk_dir for spk_dir in input_dir.iterdir() if spk_dir.is_dir()]
-    for speaker_dir in tqdm(speaker_directories[:max_speakers_num], desc="Computing WER..."):
+    speaker_directories = [
+        spk_dir for spk_dir in input_dir.iterdir() if spk_dir.is_dir()
+    ]
+    for speaker_dir in tqdm(
+        speaker_directories[:max_speakers_num], desc="Computing WER..."
+    ):
 
         audio_files = list(speaker_dir.rglob("*.wav"))
         speaker_embedding_path = speaker_dir / "speaker_embedding.npy"
@@ -128,7 +132,9 @@ def compute_wer(
             sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
 
             try:
-                predicted_text = asr_model.transcribe(TMP_FILENAME)['segments'][0]['text']
+                predicted_text = asr_model.transcribe(TMP_FILENAME)["segments"][
+                    0
+                ]["text"]
 
             # When ASR model failed to transcribe audio
             except IndexError:
