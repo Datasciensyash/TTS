@@ -1,19 +1,17 @@
 import argparse
+import warnings
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import soundfile as sf
-from tqdm import tqdm
-
-
-from TTS.vits_eval_interface import VITSEvalInterface
 from nisqa import NISQA_WEIGHTS_DIR
 from nisqa.model import nisqaModel
+from tqdm import tqdm
 
+from TTS.vits_eval_interface import VITSEvalInterface
 
-import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
@@ -27,12 +25,12 @@ OUT_COLUMNS = ["mos_pred", "noi_pred", "dis_pred", "col_pred", "loud_pred"]
 
 NISQA_ARGS = {
     "pretrained_model": str(NISQA_WEIGHTS_DIR / "nisqa.tar"),
-    "mode": 'predict_csv',
+    "mode": "predict_csv",
     "csv_deg": COLUMN_NAME,
     "csv_file": TMP_CSV_FILE_NAME,
     "data_dir": NISQA_MODEL_NAME,
     "ms_channel": 0,
-    "output_dir": OUTPUT_DIR
+    "output_dir": OUTPUT_DIR,
 }
 
 
@@ -118,8 +116,12 @@ def compute_mos_nisqa(
     test_texts = texts_file.read_text().splitlines()
 
     output_file_names = []
-    speaker_directories = [spk_dir for spk_dir in input_dir.iterdir() if spk_dir.is_dir()]
-    for speaker_dir in tqdm(speaker_directories[:max_speakers_num], desc="TTS Inference..."):
+    speaker_directories = [
+        spk_dir for spk_dir in input_dir.iterdir() if spk_dir.is_dir()
+    ]
+    for speaker_dir in tqdm(
+        speaker_directories[:max_speakers_num], desc="TTS Inference..."
+    ):
 
         audio_files = list(speaker_dir.rglob("*.wav"))
         speaker_embedding_path = speaker_dir / "speaker_embedding.npy"
@@ -137,7 +139,11 @@ def compute_mos_nisqa(
             audio_name = f"{speaker_dir.name}_{i}.wav"
             output_file_names.append(audio_name)
 
-            sf.write(tmp_output_dir / audio_name, audio, vits_eval_interface.sampling_rate)
+            sf.write(
+                tmp_output_dir / audio_name,
+                audio,
+                vits_eval_interface.sampling_rate,
+            )
 
     df = pd.DataFrame(output_file_names, columns=[COLUMN_NAME])
     df.to_csv(Path(NISQA_MODEL_NAME) / TMP_CSV_FILE_NAME)
@@ -145,7 +151,7 @@ def compute_mos_nisqa(
     nisqa = nisqaModel(NISQA_ARGS)
     nisqa_predictions = nisqa.predict()[OUT_COLUMNS].mean()
 
-    print('\nPredictions:')
+    print("\nPredictions:")
     print(nisqa_predictions)
 
     return nisqa_predictions.tolist()
