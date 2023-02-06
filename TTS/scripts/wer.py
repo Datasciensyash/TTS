@@ -1,4 +1,5 @@
 import argparse
+import random
 import warnings
 from pathlib import Path
 from typing import Tuple
@@ -6,6 +7,7 @@ from typing import Tuple
 import fastwer
 import numpy as np
 import soundfile as sf
+import torch
 import whisperx
 from tqdm import tqdm
 
@@ -16,6 +18,8 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # TODO: I think that is bad idea
 TMP_FILENAME = "tmp.wav"
+TMP_DIR = Path("./tmp")
+TMP_DIR.mkdir(exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -129,10 +133,11 @@ def compute_wer(
 
         for text in test_texts:
             audio = vits_eval_interface(text, speaker_embedding)
-            sf.write(TMP_FILENAME, audio, vits_eval_interface.sampling_rate)
+            tmp_fname = TMP_DIR / f"{random.randint(1, 100000)}.wav"
+            sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
 
             try:
-                predicted_text = asr_model.transcribe(TMP_FILENAME)["segments"][
+                predicted_text = asr_model.transcribe(str(tmp_fname))["segments"][
                     0
                 ]["text"]
 
@@ -145,6 +150,10 @@ def compute_wer(
 
     cer = fastwer.score(original_texts, predicted_texts, char_level=True)
     wer = fastwer.score(original_texts, predicted_texts, char_level=False)
+
+    # Remove TMP DIR
+    for tmp_file in TMP_DIR.iterdir():
+        tmp_file.unlink()
 
     print(f"WER: {wer} | CER: {cer}")
 
