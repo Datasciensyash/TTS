@@ -7,6 +7,7 @@ from typing import Tuple
 import fastwer
 import numpy as np
 import soundfile as sf
+import torch
 import whisperx
 from tqdm import tqdm
 
@@ -137,7 +138,7 @@ def compute_wer(
             #sf.write(tmp_fname, audio, vits_eval_interface.sampling_rate)
 
             try:
-                predicted_text = asr_model.transcribe(audio)["segments"][
+                predicted_text = asr_model.transcribe(torch.Tensor(audio))["segments"][
                     0
                 ]["text"]
 
