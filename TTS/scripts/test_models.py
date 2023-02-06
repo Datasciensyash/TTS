@@ -1,4 +1,5 @@
 import argparse
+import json
 from csv import writer
 from pathlib import Path
 from typing import List
@@ -135,7 +136,7 @@ def default_model_test(
 
                 csvwriter.writerow(data_row)
                 with sentinel.open("w") as f:
-                    f.write(dict(zip(columns, data_row)))
+                    json.dump(dict(zip(columns, data_row)), f)
 
         print(f"Test results are saved in {out_csv}")
 
