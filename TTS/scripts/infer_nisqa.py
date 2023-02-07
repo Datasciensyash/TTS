@@ -67,18 +67,30 @@ def compute_mos_nisqa(
     audios = list(input_dir.rglob("*.flac"))
     audios += list(input_dir.rglob("*.wav"))
 
-    df = pd.DataFrame([i.relative_to(input_dir) for i in audios], columns=[COLUMN_NAME])
-    df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
+    (output_dir / f"tmp_{input_dir.name}").mkdir(parents=True, exist_ok=True)
 
-    NISQA_ARGS["data_dir"] = str(input_dir)
-    NISQA_ARGS["output_dir"] = str(output_dir)
+    predictions = []
+    chunk_size = 1000
+    for i in range(0, len(audios), chunk_size):
+        df = pd.DataFrame([i.relative_to(input_dir) for i in audios[i:i+chunk_size]], columns=[COLUMN_NAME])
+        df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
+        NISQA_ARGS["data_dir"] = str(input_dir)
+        NISQA_ARGS["output_dir"] = str(output_dir)
 
-    nisqa = nisqaModel(NISQA_ARGS)
-    nisqa_predictions = nisqa.predict()
+        try:
+            nisqa = nisqaModel(NISQA_ARGS)
+            nisqa_predictions = nisqa.predict()
+        except RuntimeError:
+            print('Runtime Error in chunk {i}, skipping...')
+            continue
 
-    Path(input_dir / TMP_CSV_FILE_NAME).unlink()
+        Path(input_dir / TMP_CSV_FILE_NAME).unlink()
 
-    nisqa_predictions.to_csv(output_dir / f"nisqa_predictions_{input_dir.name}.csv", index=False)
+        nisqa_predictions.to_csv(output_dir / f"tmp_{input_dir.name}" / f"nisqa_predictions_{input_dir.name}_{i}.csv", index=False)
+        predictions.append(nisqa_predictions)
+
+    predictions = pd.concat(predictions)
+    predictions.to_csv(output_dir / f"nisqa_predictions_{input_dir.name}.csv", index=False)
 
 
 def main():
