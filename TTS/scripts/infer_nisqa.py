@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from nisqa import NISQA_WEIGHTS_DIR
 from nisqa.model import nisqaModel
+import librosa
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -63,7 +64,10 @@ def compute_mos_nisqa(
         device: str,
 ) -> None:
 
-    df = pd.DataFrame([i.relative_to(input_dir) for i in input_dir.rglob("*.wav")], columns=[COLUMN_NAME])
+    audios = list(input_dir.rglob("*.wav"))
+    audios = [i for i in audios if librosa.get_duration(filename=str(i)) > 0.5]
+
+    df = pd.DataFrame([i.relative_to(input_dir) for i in audios], columns=[COLUMN_NAME])
     df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
 
     NISQA_ARGS["data_dir"] = str(input_dir)
