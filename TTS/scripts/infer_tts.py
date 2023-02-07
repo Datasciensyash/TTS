@@ -86,7 +86,10 @@ def infer_vits_model(
     texts = texts_file.read_text().splitlines()
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    speaker_embedding = np.load(speaker_embedding_path)
+
+    speaker_embedding = vits_eval_interface.get_speaker_embedding(
+        [speaker_embedding_path]
+    )
     for i, text in tqdm(enumerate(texts), desc="TTS Inference..."):
         audio = vits_eval_interface(text, speaker_embedding)
         sf.write(output_dir / f"{i}.wav", audio, vits_eval_interface.sampling_rate)
