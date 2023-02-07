@@ -65,7 +65,6 @@ def compute_mos_nisqa(
 ) -> None:
 
     audios = list(input_dir.rglob("*.wav"))
-    audios = [i for i in audios if librosa.get_duration(filename=str(i)) > 0.5]
 
     df = pd.DataFrame([i.relative_to(input_dir) for i in audios], columns=[COLUMN_NAME])
     df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
