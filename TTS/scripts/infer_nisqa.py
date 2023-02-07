@@ -63,7 +63,7 @@ def compute_mos_nisqa(
         device: str,
 ) -> None:
 
-    df = pd.DataFrame(list(input_dir.rglob("*.wav")), columns=[COLUMN_NAME])
+    df = pd.DataFrame([i.relative_to(input_dir) for i in input_dir.rglob("*.wav")], columns=[COLUMN_NAME])
     df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
 
     NISQA_ARGS["data_dir"] = str(input_dir)
