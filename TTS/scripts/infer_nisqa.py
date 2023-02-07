@@ -64,7 +64,7 @@ def compute_mos_nisqa(
 ) -> None:
 
     df = pd.DataFrame(list(input_dir.rglob("*.wav")), columns=[COLUMN_NAME])
-    df.to_csv(TMP_CSV_FILE_NAME, index=False)
+    df.to_csv(input_dir / TMP_CSV_FILE_NAME, index=False)
 
     NISQA_ARGS["data_dir"] = str(input_dir)
     NISQA_ARGS["output_dir"] = str(output_dir)
@@ -72,7 +72,7 @@ def compute_mos_nisqa(
     nisqa = nisqaModel(NISQA_ARGS)
     nisqa_predictions = nisqa.predict()[OUT_COLUMNS].mean()
 
-    Path(TMP_CSV_FILE_NAME).unlink()
+    Path(input_dir / TMP_CSV_FILE_NAME).unlink()
 
     nisqa_predictions.to_csv(output_dir / f"nisqa_predictions_{input_dir.name}.csv", index=False)
 
