@@ -74,7 +74,7 @@ def compute_mos_nisqa(
     NISQA_ARGS["output_dir"] = str(output_dir)
 
     nisqa = nisqaModel(NISQA_ARGS)
-    nisqa_predictions = nisqa.predict()[OUT_COLUMNS].mean()
+    nisqa_predictions = nisqa.predict()[OUT_COLUMNS]
 
     Path(input_dir / TMP_CSV_FILE_NAME).unlink()
 
