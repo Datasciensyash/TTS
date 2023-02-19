@@ -23,6 +23,7 @@ class TTSServingConfig:
         Args:
             path: The path to the JSON file to save to.
         """
+        self.model_root_dir = str(self.model_root_dir)  # type: ignore
         path.write_text(json.dumps(self.__dict__))
 
     @classmethod
@@ -33,4 +34,6 @@ class TTSServingConfig:
         Returns:
             The loaded VCServingConfig.
         """
-        return cls(**json.loads(path.read_text()))
+        config = cls(**json.loads(path.read_text()))
+        config.model_root_dir = Path(config.model_root_dir)
+        return config
