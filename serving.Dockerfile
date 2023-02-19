@@ -4,7 +4,7 @@ COPY . /TTS
 WORKDIR /TTS
 
 # Pypi and internal packages
-RUN pip install -e .
+RUN pip install -e . && apt update && apt install libsndfile1 -y && apt install espeak-ng -y
 
 COPY model_repository/ model_repository/
 
