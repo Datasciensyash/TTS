@@ -16,8 +16,6 @@ class TTSTritonExporter:
         speaker_encoder_checkpoint_path: Path,
     ) -> None:
         self._logger = logging.getLogger("tts_triton_exporter")
-
-        self._serving_config = TTSServingConfig()
         self._checkpoint_path = checkpoint_path
         self._speaker_encoder_checkpoint_path = speaker_encoder_checkpoint_path
 
@@ -61,7 +59,8 @@ class TTSTritonExporter:
         shutil.copy(self._speaker_encoder_checkpoint_path.with_name(SPEAKER_ENCODER_CONFIG_FILE_NAME), speaker_encoder_model_config_path)
 
         # Export serving_config.json
-        self._serving_config.to_json(version_dir / SERVING_CONFIG_NAME)
+        serving_config = TTSServingConfig(model_root_dir=tts_model_export_path)
+        serving_config.to_json(version_dir / SERVING_CONFIG_NAME)
 
         # Export model.py
         model_export_path = version_dir / EXPORTED_MODEL_PY_NAME
