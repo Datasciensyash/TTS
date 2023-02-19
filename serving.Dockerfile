@@ -4,7 +4,7 @@ COPY . /TTS
 WORKDIR /TTS
 
 # Pypi and internal packages
-RUN pip install -e . && apt update && apt install libsndfile1 -y && apt install espeak-ng -y
+RUN rm /etc/apt/sources.list.d/cuda.list && rm /etc/apt/sources.list.d/nvidia-ml.list && pip install -e . && apt update && apt install libsndfile1 -y && apt install espeak-ng -y
 
 COPY model_repository/ model_repository/
 
