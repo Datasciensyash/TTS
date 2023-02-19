@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import torch
 import numpy as np
@@ -10,6 +10,7 @@ from TTS.tts.models import setup_model
 from TTS.tts.utils.speakers import SpeakerManager
 
 
+DEFAULT_CHECKPOINT = "best_model.pth"
 CONFIG_FILE_NAME = "config.json"
 LANGUAGE_IDS_FILE_NAME = "language_ids.json"
 SPEAKER_ENCODER_CONFIG_FILE_NAME = "config_se.json"
@@ -21,7 +22,7 @@ class VITSEvalInterface:
             device: str,
             model_root_dir: Path,
             speaker_encoder_checkpoint_path: Path,
-            checkpoint_name: str = "best_model.pth",
+            checkpoint_name: str = DEFAULT_CHECKPOINT,
     ):
         self.device = device
 
@@ -59,11 +60,12 @@ class VITSEvalInterface:
     def __call__(
             self,
             text: str,
-            speaker_embedding: torch.Tensor,
+            speaker_embedding: Union[torch.Tensor, np.ndarray],
             length_scale: float = 1.0,
             noise_scale: float = 0.0,
         ) -> np.ndarray:
 
+        speaker_embedding = torch.Tensor(speaker_embedding)
         self.model.length_scale = length_scale  # set speed of the speech.
         self.model.noise_scale = noise_scale  # set speech variation
 
