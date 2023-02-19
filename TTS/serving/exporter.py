@@ -46,6 +46,7 @@ class TTSTritonExporter:
 
         # Export TTS model (move checkpoint)
         tts_model_export_path = version_dir / TTS_CHECKPOINT_DIR_NAME
+        tts_model_export_path.mkdir(exist_ok=True, parents=True)
         tts_model_checkpoint_path = tts_model_export_path / DEFAULT_TTS_CHECKPOINT_NAME
         tts_model_config_path = tts_model_export_path / DEFAULT_TTS_CONFIG_NAME
         shutil.copy(self._checkpoint_path, tts_model_checkpoint_path)
@@ -53,6 +54,7 @@ class TTSTritonExporter:
 
         # Export Speaker Encoder model (move checkpoint)
         speaker_encoder_model_export_path = version_dir / SPEAKER_ENCODER_CHECKPOINT_DIR_NAME
+        speaker_encoder_model_export_path.mkdir(exist_ok=True, parents=True)
         speaker_encoder_model_checkpoint_path = speaker_encoder_model_export_path / DEFAULT_SPEAKER_ENCODER_CHECKPOINT_NAME
         speaker_encoder_model_config_path = speaker_encoder_model_export_path / DEFAULT_SPEAKER_ENCODER_CONFIG_NAME
         shutil.copy(self._speaker_encoder_checkpoint_path, speaker_encoder_model_checkpoint_path)
