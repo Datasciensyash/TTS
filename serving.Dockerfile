@@ -4,8 +4,7 @@ COPY . /TTS
 WORKDIR /TTS
 
 # Pypi and internal packages
-RUN pip install -e . && pip cache purge && rm ~/.gitconfig
-# RUN pip3 install -U torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
+RUN pip install -e .
 
 COPY model_repository/ model_repository/
 
