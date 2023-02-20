@@ -28,7 +28,7 @@ class TTSServingConfig:
 
     @classmethod
     def from_json(cls, path: Path) -> "TTSServingConfig":
-        """Load a VCServingConfig from a JSON file at the specified path.
+        """Load a TTSServingConfig from a JSON file at the specified path.
         Args:
             path: The path to the JSON file to load from.
         Returns:
