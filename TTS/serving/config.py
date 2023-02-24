@@ -9,10 +9,11 @@ from TTS.serving.constants import TEXT_INPUT_NAME, SPEAKER_EMBEDDING_INPUT_NAME,
 @dataclass
 class TTSServingConfig:
     """The configuration for a TTS model serving instance."""
+    model_root_dir: Path
+    speaker_encoder_checkpoint_path: Path
+    
     device: str = "cuda:0"
-    model_root_dir: Path = None
     checkpoint_name: str = "best_model.pth"
-    speaker_encoder_checkpoint_path = None
     
     source_text_field: str = TEXT_INPUT_NAME
     speaker_embedding_field: str = SPEAKER_EMBEDDING_INPUT_NAME

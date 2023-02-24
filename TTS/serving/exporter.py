@@ -59,7 +59,10 @@ class TTSTritonExporter:
         shutil.copy(self._speaker_encoder_checkpoint_path.with_name(SPEAKER_ENCODER_CONFIG_FILE_NAME), speaker_encoder_model_config_path)
 
         # Export serving_config.json
-        serving_config = TTSServingConfig(model_root_dir=tts_model_export_path)
+        serving_config = TTSServingConfig(
+            model_root_dir=tts_model_export_path,
+            speaker_encoder_checkpoint_path=speaker_encoder_model_checkpoint_path,
+        )
         serving_config.to_json(version_dir / SERVING_CONFIG_NAME)
 
         # Export model.py
