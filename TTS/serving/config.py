@@ -2,9 +2,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from TTS.serving.constants import TEXT_INPUT_NAME, SPEAKER_EMBEDDING_INPUT_NAME, \
-    AUDIO_SIGNAL_OUTPUT_NAME, AUDIO_SIGNAL_INPUT_NAME, SPEAKER_EMBEDDING_OUTPUT_NAME, AUDIO_SIGNAL_SAMPLING_RATE
-
+from TTS.serving.constants import *
 
 @dataclass
 class TTSServingConfig:
