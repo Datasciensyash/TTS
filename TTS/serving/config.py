@@ -11,7 +11,7 @@ class TTSServingConfig:
     """The configuration for a TTS model serving instance."""
     model_root_dir: Path
     speaker_encoder_checkpoint_path: Path
-    
+
     device: str = "cuda:0"
     checkpoint_name: str = "best_model.pth"
     
@@ -25,6 +25,7 @@ class TTSServingConfig:
             path: The path to the JSON file to save to.
         """
         self.model_root_dir = str(self.model_root_dir)  # type: ignore
+        self.speaker_encoder_checkpoint_path = str(self.speaker_encoder_checkpoint_path)  # type: ignore
         path.write_text(json.dumps(self.__dict__))
 
     @classmethod
@@ -37,4 +38,5 @@ class TTSServingConfig:
         """
         config = cls(**json.loads(path.read_text()))
         config.model_root_dir = Path(config.model_root_dir)
+        config.speaker_encoder_checkpoint_path = Path(config.speaker_encoder_checkpoint_path)
         return config
