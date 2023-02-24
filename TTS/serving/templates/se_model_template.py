@@ -28,7 +28,7 @@ class TritonPythonModel:
         )
 
         self._eval_interface = SpeakerEncoderEvalInterface(
-            checkpoint_path=self._serving_config.model_checkpoint_path,
+            checkpoint_path=THIS_DIR / self._serving_config.model_checkpoint_path,
         )
 
         self._model_config = json.loads(args[MODEL_CONFIG])

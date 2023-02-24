@@ -28,7 +28,7 @@ class TritonPythonModel:
         )
 
         self._eval_interface = VITSEvalInterfaceV2(
-            model_checkpoint_path=self._serving_config.model_checkpoint_path,
+            model_checkpoint_path=THIS_DIR / self._serving_config.model_checkpoint_path,
             device=self._serving_config.device,
         )
 

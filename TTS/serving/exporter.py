@@ -60,7 +60,7 @@ class TTSTritonExporter:
 
         # Export serving_config.json
         serving_config = TTSServingConfig(
-            model_checkpoint_path=tts_model_checkpoint_path,
+            model_checkpoint_path=Path(TTS_CHECKPOINT_DIR_NAME) / DEFAULT_TTS_CHECKPOINT_NAME,
         )
         serving_config.to_json(version_dir / SERVING_CONFIG_NAME)
 
@@ -84,7 +84,7 @@ class TTSTritonExporter:
 
         # Export serving_config.json
         serving_config = SEServingConfig(
-            model_checkpoint_path=speaker_encoder_model_checkpoint_path,
+            model_checkpoint_path=Path(SPEAKER_ENCODER_CHECKPOINT_DIR_NAME) / DEFAULT_SPEAKER_ENCODER_CHECKPOINT_NAME,
         )
         serving_config.to_json(version_dir / SERVING_CONFIG_NAME)
 
