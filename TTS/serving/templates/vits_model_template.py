@@ -7,8 +7,8 @@ import numpy as np
 import triton_python_backend_utils as pb_utils
 
 from TTS.serving.constants import SERVING_CONFIG_NAME
-from TTS.vits_eval_interface import VITSEvalInterface
 from TTS.serving.config import TTSServingConfig
+from TTS.vits_eval_interface_v2 import VITSEvalInterfaceV2
 
 MODEL_CONFIG = "model_config"
 DATA_TYPE = "data_type"
@@ -17,7 +17,7 @@ THIS_DIR = Path(__file__).parent
 
 
 class TritonPythonModel:
-    _eval_interface: VITSEvalInterface
+    _eval_interface: VITSEvalInterfaceV2
     _serving_config: TTSServingConfig
     _model_config: Dict
     _target_audio_dtype: Any
@@ -27,10 +27,8 @@ class TritonPythonModel:
             THIS_DIR / SERVING_CONFIG_NAME
         )
 
-        self._eval_interface = VITSEvalInterface(
-            model_root_dir=self._serving_config.model_root_dir,
-            speaker_encoder_checkpoint_path=self._serving_config.speaker_encoder_checkpoint_path,
-            checkpoint_name=self._serving_config.checkpoint_name,
+        self._eval_interface = VITSEvalInterfaceV2(
+            model_checkpoint_path=self._serving_config.model_checkpoint_path,
             device=self._serving_config.device,
         )
 
@@ -67,7 +65,7 @@ class TritonPythonModel:
             ).as_numpy()
 
             # TODO: Somehow we need to support batched inference
-            target_audio = self._forward(source_text.flatten(), speaker_embedding)
+            target_audio = self._forward(source_text.astype('U')[0], speaker_embedding)
             target_audio_out = pb_utils.Tensor(
                 self._serving_config.target_audio_field,
                 target_audio.astype(output0_dtype),

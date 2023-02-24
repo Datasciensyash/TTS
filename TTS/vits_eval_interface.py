@@ -9,13 +9,13 @@ from TTS.config import load_config
 from TTS.tts.models import setup_model
 from TTS.tts.utils.speakers import SpeakerManager
 
-
 DEFAULT_CHECKPOINT = "best_model.pth"
 CONFIG_FILE_NAME = "config.json"
 LANGUAGE_IDS_FILE_NAME = "language_ids.json"
 SPEAKER_ENCODER_CONFIG_FILE_NAME = "config_se.json"
 
 
+# TODO: Deprecated!
 class VITSEvalInterface:
     def __init__(
             self,
@@ -63,7 +63,7 @@ class VITSEvalInterface:
             speaker_embedding: Union[torch.Tensor, np.ndarray],
             length_scale: float = 1.0,
             noise_scale: float = 0.0,
-        ) -> np.ndarray:
+    ) -> np.ndarray:
 
         speaker_embedding = torch.Tensor(speaker_embedding)
         self.model.length_scale = length_scale  # set speed of the speech.

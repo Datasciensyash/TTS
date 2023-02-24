@@ -20,7 +20,7 @@ input [
 output [
   {
     name: "AUDIO_SIGNAL_OUTPUT_NAME"
-    data_type: TYPE_FP32
+    data_type: TYPE_INT16
     dims: [ -1 ]
   }
 ]
